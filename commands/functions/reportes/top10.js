@@ -27,10 +27,11 @@ async function topCazadores(message) {
 
                 const medallas = ['🥇', '🥈', '🥉', '🏅', '🏅', '🏅', '🏅', '🏅', '🏅', '🏅'];
                 topCazadores.forEach((cazador, index) => {
-                    response += `${medallas[index]} *${cazador.Nombre}:* ${cazador.Puntos} Pts */* ${cazador.Total} Mobs ${getRandomIcono()}\n`;
+                    response += `${index + 1}. ${medallas[index]} *${cazador.Nombre}:* ${cazador.Puntos} Pts */* ${cazador.Total} Mobs ${getRandomIcono()}\n`;
                 });
 
                 response += `\n*Fecha Caza:* ${fechaReporte}`;
+                response += `\n\n🅣🅗 ​ - ​ 🅑🅞🅣`;
                 // Enviar el mensaje con los resultados
                 sony.sendMessage(message.from, response);
             } else {

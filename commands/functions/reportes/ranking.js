@@ -14,7 +14,7 @@ async function topCazadores(message) {
             const sheet = workbook.Sheets[sheetName];
             const data = xlsx.utils.sheet_to_json(sheet); // Convertir hoja a JSON
 
-            // Ordenar los datos por puntaje (columna "Puntos") de mayor a menor
+            // Ordenar los datos por puntaje (columna "Total") de mayor a menor
             const topCazadores = data
                 .sort((a, b) => b.Total - a.Total) // Orden descendente por puntos
                 .slice(0, 10); // Obtener los primeros 10
@@ -27,11 +27,13 @@ async function topCazadores(message) {
 
                 const medallas = ['🥇', '🥈', '🥉', '🏅', '🏅', '🏅', '🏅', '🏅', '🏅', '🏅'];
                 topCazadores.forEach((cazador, index) => {
-                    response += `${medallas[index]} *${cazador.Nombre}:* ${cazador.Total} Pts ${getRandomIcono()}\n`;
+                    response += `${index + 1}. ${medallas[index]} *${cazador.Nombre}:* ${cazador.Total} Pts ${getRandomIcono()}\n`;
                 });
 
-                response += `\n🔥 ¡Sigan cazando y demostrando su habilidad, el premio está en juego! 💪\n`
+                response += `\n🔥 ¡Sigan cazando y demostrando su habilidad, el premio está en juego! 💪\n`;
                 response += `\n*Evento de Caceria mes de Marzo*`;
+                response += `\n\n🅣🅗 ​ - ​ 🅑🅞🅣`;
+
                 // Enviar el mensaje con los resultados
                 sony.sendMessage(message.from, response);
             } else {

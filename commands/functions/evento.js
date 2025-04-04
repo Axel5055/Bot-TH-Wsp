@@ -16,7 +16,7 @@ async function evento(message) {
 
 🎯 Las bases son simples: el mejor cazador de este mes recibirá *499 DIAMANTES*. Solo se toman en cuenta monstruos de *nivel 2* en adelante.
 
-⏳ La vigencia del evento es hasta el *30 de Marzo*.
+⏳ La vigencia del evento es hasta el *4 de Mayo*.
 
 ¡🏆 Suerte a todos y que gane el mejor! 🎉
 ---------------->>
@@ -26,6 +26,7 @@ async function evento(message) {
 📜 Consulta las reglas de cacería fácilmente con el comando 👉 */caza*.
 
 *Gracias por su atención.*
+
 🅣🅗 ​ - ​ 🅑🅞🅣`
             );
         } else {

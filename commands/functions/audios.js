@@ -4,21 +4,28 @@ const th = require("consola");
 const path = require("path");
 const fs = require("fs");
 
-// Lista de palabras clave y sus archivos de audio
-const palabrasClave = ["suegra"]; // Agrega más palabras según necesites
-const carpetaAudios = "./audios/"; // Ruta de la carpeta de audios
+// Listas de palabras clave
+const palabrasClaveIncluidas = ["suegra", "boo", "queman", "cariñosas", "dejen dormir", "r4", "mucho mensaje"];
+const palabrasClaveExactas = ["alv", "putos"]; // Define las palabras clave exactas
+const carpetaAudios = "./audios/";
 
 async function enviarAudio(message) {
-    const lowercase = message.body.toLowerCase();
+    const lowercase = message.body.toLowerCase().trim();
 
     try {
-        // Buscar si alguna palabra clave está dentro del mensaje
-        const palabraEncontrada = palabrasClave.find(palabra => lowercase.includes(palabra));
+        let palabraEncontrada = null;
+        
+        // Buscar si el mensaje es exactamente una de las palabras clave exactas
+        if (palabrasClaveExactas.includes(lowercase)) {
+            palabraEncontrada = lowercase;
+        } else {
+            // Buscar si alguna palabra clave está dentro del mensaje
+            palabraEncontrada = palabrasClaveIncluidas.find(palabra => lowercase.includes(palabra));
+        }
 
         if (palabraEncontrada) {
             const archivoAudio = path.join(carpetaAudios, `${palabraEncontrada}.mp3`);
 
-            // Verificar si el archivo existe
             if (fs.existsSync(archivoAudio)) {
                 const audio = MessageMedia.fromFilePath(archivoAudio);
                 await sony.sendMessage(message.from, audio, { sendAudioAsVoice: true });
