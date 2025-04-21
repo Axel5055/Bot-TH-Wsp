@@ -5,8 +5,8 @@ const path = require("path");
 const fs = require("fs");
 
 // Listas de palabras clave
-const palabrasClaveIncluidas = ["suegra", "boo", "queman", "cariñosas", "dejen dormir", "r4", "mucho mensaje"];
-const palabrasClaveExactas = ["alv", "putos"]; // Define las palabras clave exactas
+const palabrasClaveIncluidas = ["suegra", "boo", "queman", "cariñosas", "dejen dormir", "r4", "mucho mensaje" , "borojojo", "no te vallas"];
+const palabrasClaveExactas = ["alv", "putos", "jijiji", "abuela", "maldita fdg", "hdp"]; // Define las palabras clave exactas
 const carpetaAudios = "./audios/";
 
 async function enviarAudio(message) {

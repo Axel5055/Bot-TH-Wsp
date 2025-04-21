@@ -31,7 +31,7 @@ async function topCazadores(message) {
                 });
 
                 response += `\n🔥 ¡Sigan cazando y demostrando su habilidad, el premio está en juego! 💪\n`;
-                response += `\n*Evento de Caceria mes de Marzo*`;
+                response += `\n*Evento de Caceria mes de Abril*`;
                 response += `\n\n🅣🅗 ​ - ​ 🅑🅞🅣`;
 
                 // Enviar el mensaje con los resultados
