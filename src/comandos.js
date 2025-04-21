@@ -20,13 +20,13 @@ const loadModules = (directory) =>
  */
 async function comandos() {
     const directories = [
-        '../commands/functions',
+        '../commands',
         //'../commands/fun18more',
-        '../commands/functions/armaduras',
-        '../commands/functions/menus',
-        '../commands/functions/mobs',
-        '../commands/functions/reportes',
-        '../commands/functions/menciones',
+        '../commands/armaduras',
+        '../commands/menus',
+        '../commands/mobs',
+        '../commands/reportes',
+        '../commands/menciones',
     ];
 
     // Cargar todos los módulos de los directorios listados
