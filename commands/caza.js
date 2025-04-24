@@ -15,10 +15,10 @@ async function caza(message) {
 
 🔥 Los puntos requeridos son:
 
-🔹*Nivel 2:* 21 puntos semanales (⚔️ 3 diarios recomendados).
-🔹*Nivel 1:* 21 puntos semanales (*Solo castillos pequeños*, 🏹 3 diarios recomendados).
+🔹*Nivel 2:* 28 puntos semanales (⚔️ 4 diarios recomendados).
+🔹*Nivel 1:* 28 puntos semanales (*Solo castillos pequeños*, 🏹 4 diarios recomendados).
 
-📌 Nota: No es necesario cazar exactamente 3 puntos al día; puedes acumularlos como prefieras, siempre y cuando al final de la semana alcances los 21 puntos. ✅
+📌 Nota: No es necesario cazar exactamente 4 puntos al día; puedes acumularlos como prefieras, siempre y cuando al final de la semana alcances los 28 puntos. ✅
 
 ⚠️ Si no cumples con la cuota semanal, recibirás un aviso 🛑 y tendrás hasta el próximo reporte 📊 para ponerte al día. De no hacerlo, serás expulsado del gremio. 🚷
 

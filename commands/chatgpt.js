@@ -20,7 +20,7 @@ async function handleError(error, message) {
 // Función para obtener respuesta de OpenAI
 async function getOpenAIResponse(prompt) {
     const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4.1",
         messages: [{ role: "user", content: prompt }],
         max_tokens: 150,
         temperature: 0.7,
