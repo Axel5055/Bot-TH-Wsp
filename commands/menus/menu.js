@@ -23,15 +23,7 @@ async function menu(message) {
 |  🦊 > */mall* - Menú Invocar/Escudos |
 |  🦊 > */marmaduras* - Menú Armaduras |
 |  🦊 > */mreportes* - Menú de Reportes |
-
----------------->> 
-*ESCUDOS*
----------------->> 
-
-|  🦊 > */escudo [Nick]* - Avisar de escudo caído
-|  🦊 > */addescudo [Nombre] [Numero]* - Si no estas registrado usa este comando.
-|  🦊 > */list* - Genera la lista de los usuarios registrados.
-
+|  🦊 > */mescudos* - Menú de Escudos |
 
 🅣🅗 ​ - ​ 🅑🅞🅣`
                 }

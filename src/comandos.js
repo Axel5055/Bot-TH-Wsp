@@ -27,6 +27,7 @@ async function comandos() {
         '../commands/mobs',
         '../commands/reportes',
         '../commands/menciones',
+        '../commands/heroes',
     ];
 
     // Cargar todos los módulos de los directorios listados
