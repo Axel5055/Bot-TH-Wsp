@@ -36,12 +36,17 @@ async function comandos() {
     sony.on('message_create', async (message) => {
         try {
             for (const func of allFunctions) {
-                await func(message);
+                if (typeof func === 'function') {
+                    await func(message);
+                } else {
+                    th.warn(`Módulo no válido: uno de los comandos no es una función`, func);
+                }
             }
         } catch (error) {
-            console.error(`Hubo un error en comandos.js: ${error.message}`, error.stack);
+            th.error(`Hubo un error en comandos.js: ${error.message}`, error.stack);
         }
     });
+    
 }
 
 module.exports = comandos;

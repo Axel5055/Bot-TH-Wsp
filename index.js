@@ -6,6 +6,9 @@ const moment = require('moment-timezone');
 const comandos = require('./src/comandos');
 const consol = require('./log/log');
 
+const discord = require('./commands/discord');
+discord(); // 👈 solo debe llamarse una vez
+
 //estilos de texto en consola
 const red = chalk.bold.red;
 
