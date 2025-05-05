@@ -2,11 +2,11 @@ require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const sony = require('../src/client');
 const th = require('consola');
+const path = require('path');
+const fs = require('fs');
+const { MessageMedia } = require('whatsapp-web.js');
 
-const axios = require('axios');
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// Variables de entorno
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const TARGET_CHANNEL_ID = process.env.DISCORD_ALERT_CHANNEL_ID;
 const WHATSAPP_GROUP_ID = process.env.WHATSAPP_GROUP_ID;
@@ -19,38 +19,29 @@ const discordClient = new Client({
     ]
 });
 
-async function traducirConGPT(texto) {
-    try {
-        const response = await axios.post(
-            'https://api.openai.com/v1/chat/completions',
-            {
-                model: 'gpt-3.5-turbo',
-                messages: [
-                    { role: 'system', content: 'Eres un traductor de inglés a español y toma en cuenta que el contexto del texto es de lords mobile' },
-                    { role: 'user', content: `Traduce al español: ${texto}` }
-                ],
-                temperature: 0.3
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${OPENAI_API_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
+const traduccionesManual = {
+    watcher: 'Observador',
+    research: 'Investigación',
+    building: 'Construcción',
+    merging: 'Pactos',
+    hunting: 'Cacería',
+    labyrinth: 'Laberinto',
+    tycoon: 'Magnate',
+    artifact: 'Artefactos',
+    red_orb: 'Orbe Rojo',
+    yellow_orb: 'Orbe Amarillo'
+};
 
-        return response.data.choices[0].message.content.trim();
-    } catch (error) {
-        th.error('❌ Error al traducir con GPT:', error);
-        return texto; // Si falla, retorna el texto original
-    }
+function traducirManual(texto) {
+    const palabras = texto.split('|').map(p => p.trim().toLowerCase());
+    return palabras.map(palabra => {
+        return traduccionesManual[palabra] || palabra;
+    });
 }
 
+let messageHandlerRegistered = false;
 
-
-let messageHandlerRegistered = false; // bandera para evitar múltiples registros
-
-function discord () {
+function discord() {
     discordClient.once('ready', () => {
         th.success(`🤖 Bot de Discord conectado como ${discordClient.user.tag}`);
     });
@@ -59,37 +50,77 @@ function discord () {
         discordClient.on('messageCreate', async (message) => {
             if (message.channel.id !== TARGET_CHANNEL_ID || !message.author.bot) return;
 
-            let content = '';
+            let content = message.content || message.embeds[0]?.title || '';
+            if (!content) return;
 
-            // Si tiene texto directo
-            if (message.content) {
-                const textoTraducido = await traducirConGPT(message.content);
-                content += textoTraducido + '\n';
-            }
+            // Ejemplo esperado: "Hell | Watcher | Tycoon | 59m left | 128K"
+            const partes = content.split('|').map(p => p.trim());
+            if (partes.length < 5) return;
 
-            if (!content.trim()) return;
+            const [, tipo, fuente, tiempo] = partes;
+            const [tipoTraducido, fuenteTraducida] = traducirManual(`${tipo}|${fuente}`);
 
-            const whatsappMsg = `📢 *Alerta desde Discord:*\n${content}`;
+            let minutos = tiempo.toLowerCase().replace('left', '').replace('m', '').trim();
+            if (isNaN(minutos)) minutos = 'poco';
+
+            const mensajeWatcher = 
+`🌐 *${capitalizar(tipoTraducido)}* 🌐
+🪐 *Fuente:* ${capitalizar(fuenteTraducida)}
+🎖️ *Recompensa:* Medalla de ${capitalizar(tipoTraducido)}
+⏳ *Quedan:* ${minutos} minutos
+
+🅣🅗 ​ - ​ 🅑🅞🅣`;
+
+const mensajeRedOrb = 
+`🌐 *${capitalizar(tipoTraducido)}* 🌐
+🪐 *Fuente:* ${capitalizar(fuenteTraducida)}
+🎖️ *Recompensa:* ${capitalizar(tipoTraducido)}
+⏳ *Quedan:* ${minutos} minutos
+
+🅣🅗 ​ - ​ 🅑🅞🅣`;
 
             try {
-                await sony.sendMessage(WHATSAPP_GROUP_ID, whatsappMsg);
-                th.success('✅ Alerta reenviada a WhatsApp.');
+                if (tipo.toLowerCase() === 'watcher') {
+                    const imagePath = path.join(__dirname, '../img/alertas/watcher.jpg'); // Ajusta ruta si es necesario
+                    if (fs.existsSync(imagePath)) {
+                        const media = await MessageMedia.fromFilePath(imagePath);
+                        await sony.sendMessage(WHATSAPP_GROUP_ID, media, { caption: mensajeWatcher });
+                        th.success('✅ Imagen de Watcher enviada con mensaje.');
+                    } else {
+                        th.warn('⚠️ Imagen de Watcher no encontrada. Enviando solo mensaje.');
+                        await sony.sendMessage(WHATSAPP_GROUP_ID, mensajeWatcher);
+                    }
+                }else if (tipo.toLowerCase() === 'red_orb') {
+                    const imagePath = path.join(__dirname, '../img/alertas/watcher.jpg'); // Ajusta ruta si es necesario
+                    if (fs.existsSync(imagePath)) {
+                        const media = await MessageMedia.fromFilePath(imagePath);
+                        await sony.sendMessage(WHATSAPP_GROUP_ID, media, { caption: mensajeRedOrb });
+                        th.success('✅ Imagen de Watcher enviada con mensaje.');
+                    } else {
+                        th.warn('⚠️ Imagen de Watcher no encontrada. Enviando solo mensaje.');
+                        await sony.sendMessage(WHATSAPP_GROUP_ID, mensajeRedOrb);
+                    }
+                } 
+                else {
+                    await sony.sendMessage(WHATSAPP_GROUP_ID, mensajeWatcher);
+                }
+                th.success('✅ Alerta personalizada enviada a WhatsApp.');
             } catch (error) {
                 th.error('❌ Error al enviar mensaje a WhatsApp:', error);
             }
 
-            // Log en consola para depuración
-            const logContent = message.content || message.embeds[0]?.description || '[Embed sin descripción]';
+            const logContent = message.content || message.embeds[0]?.title || '[Mensaje sin contenido]';
             console.log(`[Discord] ${message.author.username}: ${logContent} en canal ${message.channel.id}`);
         });
 
-        messageHandlerRegistered = true; // marcar como registrado
+        messageHandlerRegistered = true;
     }
 
     discordClient.login(DISCORD_BOT_TOKEN);
 }
 
-
+function capitalizar(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 module.exports = discord;
-

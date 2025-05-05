@@ -1,3 +1,5 @@
+const sony = require('../src/client');
+
 function consola() {
     console.clear();
     console.log(`
@@ -19,5 +21,11 @@ function consola() {
 
                                   `)
   };
+
+  sony.on('message', async (msg) => {
+    if (msg.from.endsWith('@g.us')) {
+        console.log('Grupo ID:', msg.from);
+    }
+});
   
   module.exports = consola;
