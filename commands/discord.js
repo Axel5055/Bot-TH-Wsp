@@ -52,7 +52,7 @@ async function enviarAlertaWhatsApp(tipoRaw, fuente, minutos, imagen) {
     const fuenteTraducida = capitalizar(fuente);
     const tiposTexto = tiposTraducidos.map(capitalizar).join(', ');
 
-    const tiposConMedalla = ['watcher', 'chaos_dragon'];
+    const tiposConMedalla = ['observador', 'dragon del caos'];
     const tipoKeys = tiposTraducidos.map(t => normalizarClave(t));
 
     const esMedalla = tipoKeys.every(t => tiposConMedalla.includes(t));
