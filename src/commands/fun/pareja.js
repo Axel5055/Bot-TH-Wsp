@@ -1,5 +1,8 @@
 const sony = require("../../bot/client");
 const th = require("consola");
+const path = require("path");
+const fs = require("fs");
+const { MessageMedia } = require("whatsapp-web.js");
 
 async function pareja(message) {
     try {
@@ -14,7 +17,6 @@ async function pareja(message) {
 
             const participantes = chat.participants;
 
-            // Crear lista de contactos con nombre y número
             const miembros = await Promise.all(participantes.map(async (p) => {
                 const contacto = await sony.getContactById(p.id._serialized);
                 return {
@@ -28,7 +30,6 @@ async function pareja(message) {
                 return sony.sendMessage(message.from, '*⚠️ No hay suficientes miembros para formar una pareja.*');
             }
 
-            // Elegir 2 miembros aleatorios
             const mezclados = miembros.sort(() => 0.5 - Math.random());
             const pareja = mezclados.slice(0, 2);
 
@@ -40,6 +41,16 @@ async function pareja(message) {
             await sony.sendMessage(message.from, response, {
                 mentions: pareja.map(p => p.contacto)
             });
+
+            // 👉 Enviar audio "amor.mp3"
+            const carpetaAudios = "./src/assets/audios";
+            const audioPath = path.join(carpetaAudios, "amor.mp3");
+            if (fs.existsSync(audioPath)) {
+                const audio = await MessageMedia.fromFilePath(audioPath);
+                await sony.sendMessage(message.from, audio, { sendAudioAsVoice: true }); // true = nota de voz, false = audio normal
+            } else {
+                th.warn('⚠️ El archivo amor.mp3 no se encontró en la carpeta audios.');
+            }
         }
     } catch (error) {
         th.warn('⚠️ Error al generar la pareja:', error);

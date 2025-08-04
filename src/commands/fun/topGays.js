@@ -1,5 +1,8 @@
 const sony = require("../../bot/client");
 const th = require("consola");
+const path = require("path");
+const { MessageMedia } = require("whatsapp-web.js");
+const fs = require("fs");
 
 async function topGays(message) {
     try {
@@ -43,6 +46,16 @@ async function topGays(message) {
             await sony.sendMessage(message.from, response, {
                 mentions: mentions
             });
+
+             // 👉 Enviar audio "gay.mp3"
+            const carpetaAudios = "./src/assets/audios";
+            const audioPath = path.join(carpetaAudios, "gay.mp3");
+            if (fs.existsSync(audioPath)) {
+                const audio = await MessageMedia.fromFilePath(audioPath);
+                await sony.sendMessage(message.from, audio, { sendAudioAsVoice: true }); // true = nota de voz, false = audio normal
+            } else {
+                th.warn('⚠️ El archivo amor.mp3 no se encontró en la carpeta audios.');
+            }
         }
     } catch (error) {
         th.warn('⚠️ Error al generar el Top Gay:', error);
