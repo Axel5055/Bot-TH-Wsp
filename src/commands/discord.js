@@ -130,19 +130,19 @@ function discord() {
 
                 // Verifica combinaciones específicas primero
                 if (tipoSet.has('red_orb') && tipoSet.has('yellow_orb')) {
-                    imagen = path.join(__dirname, '../img/alertas/yellow_orb.jpg'); // Usa imagen combinada
+                    imagen = path.join(__dirname, '../assets/img/alertas/yellow_orb.jpg'); // Usa imagen combinada
                 } else if (tipoSet.has('red_orb') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../img/alertas/red_orbe.jpg');
+                    imagen = path.join(__dirname, '../assets/img/alertas/red_orbe.jpg');
                 } else if (tipoSet.has('yellow_orb') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../img/alertas/yellow_orb.jpg');
+                    imagen = path.join(__dirname, '../assets/img/alertas/yellow_orb.jpg');
                 } else if (tipoSet.has('watcher') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../img/alertas/watcher.jpg');
+                    imagen = path.join(__dirname, '../assets/img/alertas/watcher.jpg');
                 } else if (tipoSet.has('ancient_core') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../img/alertas/ancient_core.jpg');
+                    imagen = path.join(__dirname, '../assets/img/alertas/ancient_core.jpg');
                 } else if (tipoSet.has('chaos_core') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../img/alertas/chaos_core.jpg');
+                    imagen = path.join(__dirname, '../assets/img/alertas/chaos_core.jpg');
                 } else if (tipoSet.has('chaos_dragon') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../img/alertas/chaos_dragon.jpg');
+                    imagen = path.join(__dirname, '../assets/img/alertas/chaos_dragon.jpg');
                 }
 
                 await enviarAlertaWhatsApp(tipoRaw, fuente, minutos, imagen);
