@@ -1,48 +1,81 @@
 const th = require("consola");
-const chalk = require('chalk');
-const cyan = chalk.cyan;
-const green = chalk.green;
-const blue = chalk.italic.blue;
-const yellow = chalk.yellow;
+const chalk = require("chalk");
+
+const c = {
+    cyan: chalk.cyan,
+    green: chalk.green,
+    blue: chalk.italic.blue,
+    yellow: chalk.yellow,
+};
 
 async function logmsg(message) {
     try {
-        const mensajeporcaracteres = message.body?.length || 0; // Evitar errores si message.body es undefined
-        
-        let chat;
-        try {
-            chat = await message.getChat();
-        } catch (err) {
-            th.warn("Error obteniendo el chat:", err.message);
-            return; // Salir si no se puede obtener el chat
-        }
-
+        const body = message.body || "";
         const notifyName = message._data?.notifyName || "Desconocido";
+        const charCount = body.length;
 
-        if (message.hasMedia && message.from === 'status@broadcast' && !message.body) {
-            th.info(cyan(`Estado sin texto de ${notifyName}\n`));
-        } else if (message.hasMedia && message.from === 'status@broadcast') {
-            th.info(cyan(`Estado de: ${notifyName}\n`) + green(`Mensaje: ${message.body} \n`));
-        } else if (message.from === 'status@broadcast') {
-            th.info(cyan(`Estado de: ${notifyName}\n`) + green(`Mensaje: ${message.body}\n`));
-        } else if (chat.isGroup && message.hasMedia && message.type === 'image' && mensajeporcaracteres < 1999) {
-            th.info(`Imagen de grupo\n` +
-                cyan(`Grupo: ${chat.name}\n`) +
-                green(`Número: ${message.author}\n`) +
-                blue(`Usuario: ${notifyName}\n`) +
-                yellow(`Mensaje: ${message.body}\n`));
-        } else if (chat.isGroup && mensajeporcaracteres < 1999) {
-            th.info(cyan(`Grupo: ${chat.name}\n`) +
-                green(`Número: ${message.author}\n`) +
-                blue(`Usuario: ${notifyName}\n`) +
-                yellow(`Mensaje: ${message.body}\n`));
-        } else if (mensajeporcaracteres < 1999) {
-            th.info(green(`Usuario: ${notifyName}\n`) + blue(`Mensaje: ${message.body}\n`));
-        } else {
-            th.warn('Estos son mensajes no declarados o inválidos\n');
+        // Obtener chat
+        const chat = await message.getChat().catch(err => {
+            th.warn("Error obteniendo el chat:", err.message);
+            return null;
+        });
+        if (!chat) return;
+
+        // Función auxiliar para formatear salida
+        const formatLog = (data) =>
+            Object.entries(data)
+                .filter(([_, v]) => v) // solo mostrar si existe
+                .map(([k, v]) => `${k}: ${v}\n`)
+                .join("");
+
+        // 🔹 Estados de WhatsApp
+        if (message.from === "status@broadcast") {
+            if (message.hasMedia && !body) {
+                th.info(c.cyan(`Estado sin texto de ${notifyName}\n`));
+                return;
+            }
+
+            th.info(
+                formatLog({
+                    Estado: c.cyan(notifyName),
+                    Mensaje: c.green(body),
+                })
+            );
+            return;
         }
+
+        // 🔹 Mensajes en grupos
+        if (chat.isGroup) {
+            const baseData = {
+                Grupo: c.cyan(chat.name),
+                Número: c.green(message.author),
+                Usuario: c.blue(notifyName),
+                Mensaje: charCount < 1999 ? c.yellow(body) : "[Mensaje largo]",
+            };
+
+            th.info(
+                (message.hasMedia && message.type === "image"
+                    ? "📷 Imagen de grupo\n"
+                    : "") + formatLog(baseData)
+            );
+            return;
+        }
+
+        // 🔹 Mensajes privados
+        if (charCount < 1999) {
+            th.info(
+                formatLog({
+                    Usuario: c.green(notifyName),
+                    Mensaje: c.blue(body),
+                })
+            );
+            return;
+        }
+
+        // 🔹 Casos no declarados
+        th.warn("Estos son mensajes no declarados o inválidos\n");
     } catch (error) {
-        th.error('Hay un error en logmsg.js:', error.message);
+        th.error("Hay un error en logmsg.js:", error.message);
     }
 }
 

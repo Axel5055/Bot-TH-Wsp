@@ -31,6 +31,10 @@ const sony = new Client({
         headless: 'new',  // Cambiado a 'new' para mayor estabilidad
         ignoreHTTPSErrors: true,
     },
+    // webVersionCache: {
+    //     type: 'remote',
+    //     remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1026474633-alpha.html',
+    // },
     maxConcurrency: 1,
     maxBrowserMemory: 150 * 1024 * 1024,
     disableMediaDownload: true,

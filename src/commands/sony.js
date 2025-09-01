@@ -1,25 +1,29 @@
 async function sony(message) {
     try {
-        // Convertir el mensaje a minúsculas
-        let lowercase = message.body.toLowerCase();
+        const body = (message.body || "").trim().toLowerCase();
 
-        // Verificar si el mensaje contiene la palabra clave "sony"
-        if (lowercase === 'sony') {
-            // Responder al mensaje
-            await message.reply('Aquí estoy, ¿qué necesitas?');
+        // Si contiene la palabra "sony" (no necesariamente exacta)
+        if (body === "sony") {
+            // Respuesta al usuario
+            await message.reply("Aquí estoy, ¿qué necesitas?");
 
-            // Intentar reaccionar con un emoji
-            const emoji = '🦊'; // Emoji válido y estándar
-            await message.react(emoji);
-
-            console.log('Reacción enviada correctamente.');
+            // Reacción al mensaje
+            try {
+                await message.react("🦊");
+                console.log("Reacción enviada correctamente.");
+            } catch (err) {
+                console.warn("No se pudo enviar la reacción:", err.message);
+            }
         }
     } catch (error) {
-        // Manejar cualquier error y registrar información
-        console.error('Error en la función sony:', error);
+        console.error("Error en la función sony:", error);
 
-        // Opcional: Responder con un mensaje en caso de error
-        await message.reply('Lo siento, ocurrió un problema al procesar tu mensaje.');
+        // Evitar que un segundo error en reply rompa todo
+        try {
+            await message.reply("Lo siento, ocurrió un problema al procesar tu mensaje.");
+        } catch (err) {
+            console.warn("No se pudo enviar el mensaje de error:", err.message);
+        }
     }
 }
 

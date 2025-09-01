@@ -1,81 +1,97 @@
 const consola = require("consola");
 const OpenAI = require("openai");
 
-require("dotenv").config(); // Cargar variables de entorno
+require("dotenv").config();
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY, // Reemplaza con tu clave API de OpenAI
+    apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Configuración global
+// Configuración
 const EMOJI = "🦊";
-const PREFIX_RESPONSE = "🦊 *Respuesta de Sony* 🦊";
+const BOT_NAME = "Sony";
+const PREFIX_RESPONSE = `🦊 *${BOT_NAME}* 🦊`;
 
-// Función para manejar errores
+// Mensaje inicial de personalidad
+const SYSTEM_PROMPT = `
+Eres ${BOT_NAME}, un bot para grupos de WhatsApp. 
+Tienes personalidad divertida, directa y algo irreverente, pero siempre amable con los usuarios. 
+No usas respuestas corporativas, hablas como una persona real en español.
+Puedes bromear, ser ingenioso, y dar respuestas creativas.
+No repitas frases innecesarias como "como IA no puedo...".
+Si te piden opinión, respóndela como si fueras un amigo de confianza.
+`;
+
+// Manejo de errores
 async function handleError(error, message) {
-    consola.error("Hubo un error: " + error.message);
-    await message.reply(`${PREFIX_RESPONSE}\nLo siento, hubo un error al procesar tu solicitud.`);
+    consola.error("Hubo un error:", error);
+    await message.reply(`${PREFIX_RESPONSE}\nUps... algo salió mal 😅`);
 }
 
-// Función para obtener respuesta de OpenAI
-async function getOpenAIResponse(prompt) {
+// Obtener respuesta de OpenAI
+async function getOpenAIResponse(prompt, context = []) {
     const completion = await openai.chat.completions.create({
         model: "gpt-4.1",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 150,
-        temperature: 0.7,
+        messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...context,
+            { role: "user", content: prompt }
+        ],
+        max_tokens: 400,
+        temperature: 0.95, // Más creatividad
+        presence_penalty: 0.6, // Más variedad
+        frequency_penalty: 0.4,
     });
-    return completion.choices[0].message.content.trim();
+
+    return completion.choices[0]?.message?.content?.trim() || "No sé qué decir 😅";
 }
 
-// Función principal
-async function chatgtp(message) {
-    const lowercase = message.body.toLowerCase();
+// Procesar mensajes
+async function chatgtp(message, chatHistory = {}) {
+    const text = message.body.trim();
+    const lowercase = text.toLowerCase();
 
-    // Ignorar mensajes generados por la IA
-    if (message.body.includes(PREFIX_RESPONSE)) {
-        consola.info("Mensaje generado por la IA detectado, ignorando.");
-        return;
+    // Evitar responder a sí mismo
+    if (text.includes(PREFIX_RESPONSE)) return;
+
+    // Reacción si mencionan el nombre
+    if (lowercase.includes(BOT_NAME.toLowerCase())) {
+        try { await message.react(EMOJI); } 
+        catch (error) { consola.warn("No se pudo reaccionar:", error.message); }
     }
 
-    // Reaccionar si el mensaje contiene "sony"
-    if (lowercase.includes("sony")) {
+    // Saludo especial
+    if (lowercase === `hola ${BOT_NAME.toLowerCase()}`) {
         try {
-            await message.react(EMOJI);
-        } catch (error) {
-            consola.warn("No se pudo reaccionar al mensaje: " + error.message);
-        }
-    }
-
-    // Procesar saludo específico "hola sony"
-    if (lowercase.includes("hola sony")) {
-        try {
-            consola.start("Procesando saludo para 'hola sony'");
-            const response = await getOpenAIResponse("Saluda amablemente");
+            const response = await getOpenAIResponse("Respóndeme con un saludo amigable y algo gracioso.");
             await message.reply(`${PREFIX_RESPONSE}\n${response}`);
-            consola.success("Respuesta enviada para 'hola sony'");
         } catch (error) {
             await handleError(error, message);
         }
         return;
     }
 
-    // Procesar mensajes que comienzan con "sony"
-    if (lowercase.startsWith("sony")) {
-        const words = message.body.split(" ");
-        if (words.length >= 2) {
-            try {
-                const userPrompt = words.slice(1).join(" ");
-                consola.start(`Usuario a GPT: ${userPrompt}`);
-                const response = await getOpenAIResponse(userPrompt);
-                await message.reply(`${PREFIX_RESPONSE}\n${response}`);
-                consola.success("Respuesta enviada correctamente.");
-            } catch (error) {
-                await handleError(error, message);
-            }
-        } else {
-            consola.info("Mensaje incompleto: se requiere un texto después de 'Sony'");
-            await message.reply(`${PREFIX_RESPONSE}\nDebes escribir algo después de "Sony". Ejemplo: sony ¿cómo puedo crear una cuenta de Google?`);
+    // Si empieza con el nombre del bot
+    if (lowercase.startsWith(BOT_NAME.toLowerCase())) {
+        const userPrompt = text.split(" ").slice(1).join(" ").trim();
+
+        if (!userPrompt) {
+            await message.reply(`${PREFIX_RESPONSE}\nPon algo después de "${BOT_NAME}". Ej: ${BOT_NAME} cuéntame un chiste`);
+            return;
+        }
+
+        try {
+            // Guardar historial del chat para contexto
+            const chatId = message.from;
+            chatHistory[chatId] = chatHistory[chatId] || [];
+            chatHistory[chatId].push({ role: "user", content: userPrompt });
+
+            const response = await getOpenAIResponse(userPrompt, chatHistory[chatId]);
+            
+            chatHistory[chatId].push({ role: "assistant", content: response });
+            await message.reply(`${PREFIX_RESPONSE}\n${response}`);
+        } catch (error) {
+            await handleError(error, message);
         }
     }
 }

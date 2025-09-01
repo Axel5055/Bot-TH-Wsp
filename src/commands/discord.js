@@ -1,166 +1,137 @@
-require('dotenv').config();
-const { Client, GatewayIntentBits } = require('discord.js');
-const sony = require('../bot/client');
-const th = require('consola');
-const path = require('path');
-const fs = require('fs');
-const { MessageMedia } = require('whatsapp-web.js');
+// discord.js
+const { Client, GatewayIntentBits, Events } = require("discord.js");
+const sony = require("../bot/client");
+const th = require("consola");
+const path = require("path");
+const fs = require("fs");
+const { MessageMedia } = require("whatsapp-web.js");
 
-const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const TARGET_CHANNEL_ID = process.env.DISCORD_ALERT_CHANNEL_ID;
-const WHATSAPP_GROUP_ID = process.env.WHATSAPP_GROUP_ID;
+const { traducirManual, normalizarClave, capitalizar } = require("../utils/traduccion.js");
+const { discord, whatsapp } = require("../config"); // ← centralizamos configuración
 
-const discordClient = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
-});
-
-const traduccionesManual = {
-    watcher: 'Observador',
-    research: 'Investigación',
-    building: 'Construcción',
-    merging: 'Pactos',
-    hunting: 'Cacería',
-    labyrinth: 'Laberinto',
-    tycoon: 'Magnate',
-    artifact: 'Artefactos',
-    red_orb: 'Orbe Rojo',
-    yellow_orb: 'Orbe Amarillo',
-    chaos_dragon: 'Dragón del Caos',
-    ancient_core: 'Núcleo Antiguo',
-    chaos_core: 'Núcleo del Caos',
-};
-
-function normalizarClave(str) {
-    return str.trim().toLowerCase().replace(/\s+/g, '_');
-}
-
-function traducirManual(texto) {
-    const palabras = texto.split(/[\|,]/).map(p => normalizarClave(p.trim()));
-    return palabras.map(palabra => traduccionesManual[palabra] || palabra.replace(/_/g, ' '));
-}
-
-function capitalizar(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-async function enviarAlertaWhatsApp(tipoRaw, fuente, minutos, imagen) {
-    const tiposTraducidos = traducirManual(tipoRaw);
-    const fuenteTraducida = capitalizar(fuente);
-    const tiposTexto = tiposTraducidos.map(capitalizar).join(', ');
-
-    const tiposConMedalla = ['observador', 'dragon del caos'];
-    const tipoKeys = tiposTraducidos.map(t => normalizarClave(t));
-
-    const esMedalla = tipoKeys.every(t => tiposConMedalla.includes(t));
-
-    const recompensa = esMedalla
-        ? `🎖️ *Recompensa:* Medalla de ${tiposTexto}`
-        : `🎖️ *Recompensa:* ${tiposTexto}`;
-
-    const mensaje =
-`🌐 *${tiposTexto}* 🌐
+// === Utilidades ===
+function construirMensaje(tiposTexto, recompensa, fuenteTraducida, minutos) {
+    return `🌐 *${tiposTexto}* 🌐
 ${recompensa}
 🪐 *Fuente:* ${fuenteTraducida}
 ⏳ *Quedan:* ${minutos} minutos
 
 🅣🅗 ​ - ​ 🅑🅞🅣`;
+}
+
+function obtenerImagen(tipoSet) {
+    const imagenes = {
+        red_orb: "red_orbe.jpg",
+        yellow_orb: "yellow_orb.jpg",
+        watcher: "watcher.jpg",
+        ancient_core: "ancient_core.jpg",
+        chaos_core: "chaos_core.jpg",
+        chaos_dragon: "chaos_dragon.jpg",
+    };
+
+    if (tipoSet.has("red_orb") && tipoSet.has("yellow_orb")) {
+        return path.join(__dirname, "../assets/img/alertas/yellow_orb.jpg");
+    }
+
+    for (const tipo of tipoSet) {
+        if (imagenes[tipo]) {
+            return path.join(__dirname, `../assets/img/alertas/${imagenes[tipo]}`);
+        }
+    }
+
+    return null;
+}
+
+// === Envío de alertas ===
+async function enviarAlertaWhatsApp(tipoRaw, fuente, minutos, imagen) {
+    const tiposTraducidos = traducirManual(tipoRaw);
+    const fuenteTraducida = capitalizar(fuente);
+    const tiposTexto = tiposTraducidos.map(capitalizar).join(", ");
+
+    const tiposConMedalla = ["observador", "dragon del caos"];
+    const esMedalla = tiposTraducidos
+        .map(normalizarClave)
+        .every((t) => tiposConMedalla.includes(t));
+
+    const recompensa = esMedalla
+        ? `🎖️ *Recompensa:* Medalla de ${tiposTexto}`
+        : `🎖️ *Recompensa:* ${tiposTexto}`;
+
+    const mensaje = construirMensaje(tiposTexto, recompensa, fuenteTraducida, minutos);
 
     try {
         if (imagen && fs.existsSync(imagen)) {
             const media = await MessageMedia.fromFilePath(imagen);
-            await sony.sendMessage(WHATSAPP_GROUP_ID, media, { caption: mensaje });
-            th.success(`✅ Imagen de ${tiposTexto} enviada con mensaje.`);
+            await sony.sendMessage(whatsapp.groupId, media, { caption: mensaje });
+            th.withTag("WHATSAPP").success(`✅ Imagen de ${tiposTexto} enviada.`);
         } else {
-            await sony.sendMessage(WHATSAPP_GROUP_ID, mensaje);
-            th.success(`✅ Mensaje de ${tiposTexto} enviado sin imagen.`);
+            await sony.sendMessage(whatsapp.groupId, mensaje);
+            th.withTag("WHATSAPP").success(`✅ Mensaje de ${tiposTexto} enviado.`);
         }
     } catch (err) {
-        th.error(`❌ Error al enviar mensaje de ${tiposTexto}:`, err);
+        th.withTag("WHATSAPP").error(
+            `❌ Error al enviar mensaje de ${tiposTexto}:`,
+            process.env.NODE_ENV === "development" ? err : err.message
+        );
     }
 }
 
-let messageHandlerRegistered = false;
+// === Manejador de Discord ===
+let initialized = false;
 
-function discord() {
-    if (global.discordBotInitialized) return;
-    global.discordBotInitialized = true;
+function discordBot() {
+    if (initialized) return;
+    initialized = true;
 
-    try {
-        discordClient.once('ready', () => {
-            th.success(`🤖 Bot de Discord conectado como ${discordClient.user.tag}`);
-        });
+    const discordClient = new Client({
+        intents: [
+            GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.MessageContent,
+        ],
+    });
 
-        discordClient.on('error', (error) => {
-            th.error('❌ Error en el cliente de Discord:', error.message);
-        });
+    discordClient.once(Events.ClientReady, () => {
+        th.withTag("DISCORD").success(`🤖 Bot conectado como ${discordClient.user.tag}`);
+    });
 
-        discordClient.on('shardError', (error) => {
-            th.error('❌ Error de shard en Discord:', error.message);
-        });
+    discordClient.on("error", (error) =>
+        th.withTag("DISCORD").error("❌ Error en el cliente:", error.message)
+    );
 
-        process.on('unhandledRejection', (reason, promise) => {
-            th.error('❌ Rechazo no manejado:', reason);
-        });
+    discordClient.on("messageCreate", async (message) => {
+        try {
+            if (message.channel.id !== discord.channelId || !message.author.bot) return;
 
-        if (!messageHandlerRegistered) {
-            discordClient.on('messageCreate', async (message) => {
-                if (message.channel.id !== TARGET_CHANNEL_ID || !message.author.bot) return;
+            const content = message.content || message.embeds[0]?.title || "";
+            if (!content) return;
 
-                const content = message.content || message.embeds[0]?.title || '';
-                if (!content) return;
+            const partes = content.split("|").map((p) => p.trim());
+            if (partes.length < 5) return;
 
-                const partes = content.split('|').map(p => p.trim());
-                if (partes.length < 5) return;
+            const [, tipoRaw, fuenteRaw, tiempoRaw] = partes;
+            const fuente = traducirManual(fuenteRaw)[0] || fuenteRaw;
 
-                const [ , tipoRaw, fuenteRaw, tiempoRaw ] = partes;
+            let minutos = parseInt(tiempoRaw.replace(/[^0-9]/g, ""), 10);
+            if (isNaN(minutos)) minutos = "poco";
 
-                const fuente = traducirManual(fuenteRaw)[0] || fuenteRaw;
+            const tipoSet = new Set(tipoRaw.split(",").map((t) => normalizarClave(t.trim())));
+            const imagen = obtenerImagen(tipoSet);
 
-                let minutos = tiempoRaw.toLowerCase().replace('left', '').replace('m', '').trim();
-                if (isNaN(minutos)) minutos = 'poco';
-
-                const tiposRawNormalizados = tipoRaw.split(',').map(t => normalizarClave(t.trim()));
-                const tipoSet = new Set(tiposRawNormalizados);
-
-                let imagen = null;
-
-                // Verifica combinaciones específicas primero
-                if (tipoSet.has('red_orb') && tipoSet.has('yellow_orb')) {
-                    imagen = path.join(__dirname, '../assets/img/alertas/yellow_orb.jpg'); // Usa imagen combinada
-                } else if (tipoSet.has('red_orb') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../assets/img/alertas/red_orbe.jpg');
-                } else if (tipoSet.has('yellow_orb') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../assets/img/alertas/yellow_orb.jpg');
-                } else if (tipoSet.has('watcher') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../assets/img/alertas/watcher.jpg');
-                } else if (tipoSet.has('ancient_core') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../assets/img/alertas/ancient_core.jpg');
-                } else if (tipoSet.has('chaos_core') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../assets/img/alertas/chaos_core.jpg');
-                } else if (tipoSet.has('chaos_dragon') && tipoSet.size === 1) {
-                    imagen = path.join(__dirname, '../assets/img/alertas/chaos_dragon.jpg');
-                }
-
-                await enviarAlertaWhatsApp(tipoRaw, fuente, minutos, imagen);
-                console.log(`[Discord] ${message.author.username}: ${content} en canal ${message.channel.id}`);
-            });
-
-            messageHandlerRegistered = true;
+            await enviarAlertaWhatsApp(tipoRaw, fuente, minutos, imagen);
+            th.withTag("DISCORD").info(`[${message.author.username}]: ${content}`);
+        } catch (err) {
+            th.withTag("DISCORD").error(
+                "❌ Error procesando mensaje:",
+                process.env.NODE_ENV === "development" ? err : err.message
+            );
         }
+    });
 
-        discordClient.login(DISCORD_BOT_TOKEN).catch(err => {
-            th.warn('⚠️ No se pudo conectar a Discord. Continuando sin el bot.');
-            th.error(err.message);
-        });
-
-    } catch (error) {
-        th.warn('⚠️ Error al iniciar el cliente de Discord. Continuando sin conexión al bot.');
-        th.error(error.message);
-    }
+    discordClient.login(discord.token).catch((err) => {
+        th.withTag("DISCORD").warn("⚠️ No se pudo conectar.");
+        th.withTag("DISCORD").error(err.message);
+    });
 }
 
-module.exports = discord;
+module.exports = discordBot;

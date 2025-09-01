@@ -1,85 +1,105 @@
+// ===============================
+// 📌 Dependencias principales
+// ===============================
 const qrcode = require('qrcode-terminal');
 const chalk = require('chalk');
 const th = require("consola");
 const moment = require('moment-timezone');
 
+// 📌 Archivos locales
 const comandos = require('./bot/comandos');
 const consol = require('./utils/log');
-
 const discord = require('./commands/discord');
-discord(); // 👈 solo debe llamarse una vez
-
-//estilos de texto en consola
-const red = chalk.bold.red;
-
-//fecha y hora MX
-const mexico = moment().tz("America/Mexico_City");
-const hour = mexico.format('HH:mm:ss');
-
-//cliente
 const sony = require('./bot/client');
 
-// Guarda valores de sesión en el archivo después de una autenticación exitosa
-sony.on('authenticated', (session) => {
-    //console.clear()
-    th.success(red(`Autenticado at ${hour}\n`))
+// ===============================
+// 🎨 Estilos de consola
+// ===============================
+const log = {
+    info: (msg) => th.info(chalk.blueBright(msg)),
+    success: (msg) => th.success(chalk.greenBright(msg)),
+    warn: (msg) => th.warn(chalk.yellowBright(msg)),
+    error: (msg) => th.error(chalk.redBright(msg)),
+    banner: () => {
+        console.log(chalk.cyanBright.bold(`
+================================================
+         🚀  TH PROJECT - WhatsApp Bot 🚀
+================================================
+        `));
+    }
+};
+
+// ===============================
+// 🌎 Función utilitaria de fecha y hora en MX
+// ===============================
+const getHourMX = () => moment().tz("America/Mexico_City").format('HH:mm:ss');
+
+// ===============================
+// 📌 Inicializar Discord (se llama solo una vez)
+// ===============================
+discord();
+
+// ===============================
+// 📌 Eventos del cliente WhatsApp
+// ===============================
+
+// 🔑 Autenticación exitosa
+sony.on('authenticated', () => {
+    log.success(`✅ Autenticado correctamente a las ${getHourMX()}`);
 });
 
-//si no esta iniciado, crea un qr
+// 📲 Generar QR para iniciar sesión
 sony.on("qr", qr => {
-    console.log('------------ TH Project ------------');
-    //console.log('Código QR:', qr);
+    log.banner();
+    log.warn("⚠️ Escanea este QR con tu WhatsApp para iniciar sesión:");
     qrcode.generate(qr, { small: true });
-    console.log('------------ TH Project ------------');
+    log.banner();
 });
 
-//si esta activo, enviar mensaje a los siguientes numeros
-const send_message = [
-    "5538901631"
-]
-
-//Ejecutar cliente
+// ✅ Cliente listo para usarse
 sony.on("ready", async () => {
-    consol();
+    log.success(`🤖 Cliente activo y listo a las ${getHourMX()}`);
     
-    send_message.forEach(async (value) => {
-        const chatId = value + "@c.us";
-        const currentHour = moment().tz("America/Mexico_City").format('HH:mm:ss');
-        const message = `*_Come at me_*!! \nTiempo MX: ${currentHour}\n_Sr. Courtesy_`;
+    consol(); // Ejecuta logs personalizados
+
+    // Mensajes automáticos a números definidos
+    const send_message = ["5538901631"];
+    for (const number of send_message) {
+        const chatId = `${number}@c.us`;
+        const message = `*_Come at me_*!! \n⏰ Tiempo MX: ${getHourMX()}\n_Sr. Courtesy_`;
 
         try {
             await sony.sendMessage(chatId, message);
+            log.success(`📩 Mensaje enviado a ${number}`);
         } catch (error) {
-            console.error(`Error al enviar mensaje a ${chatId}:`, error);
+            log.error(`❌ Error al enviar mensaje a ${number}: ${error}`);
         }
-    });
-});
-
-
-//cargando
-sony.on('loading_screen', (percent, message) => {
-    if (percent === 100) {
-        console.log('Carga completa,', 'Iniciando', message);
-    } else {
-        console.log('Cargando en un', percent, '%', message);
     }
 });
 
-//conexion:
+// ⏳ Pantalla de carga
+sony.on('loading_screen', (percent, message) => {
+    if (percent === 100) {
+        log.success(`🔄 Carga completa. Iniciando: ${message}`);
+    } else {
+        log.info(`⏳ Cargando: ${percent}% - ${message}`);
+    }
+});
+
+// 🌐 Estado de conexión
 sony.on('change_state', state => {
-    th.info(red('Estatus de la conexion', state));
+    log.info(`🌍 Estado de conexión: ${chalk.bold(state)}`);
 });
 
-sony.on('disconnected', async (reason) => {
-    console.log('Cliente desconectado:', reason);
-    
-    console.log('Intentando reiniciar...');
-    setTimeout(() => {
-        sony.initialize();  // Reinicia la sesión automáticamente
-    }, 5000); // Espera 5 segundos antes de intentar reiniciar
+// ❌ Cliente desconectado y reconexión automática
+sony.on('disconnected', (reason) => {
+    log.error(`⚠️ Cliente desconectado: ${reason}`);
+    log.warn("🔄 Intentando reiniciar en 5 segundos...");
+    setTimeout(() => sony.initialize(), 5000);
 });
 
-//iniciar cliente
+// ===============================
+// 🚀 Iniciar cliente
+// ===============================
 sony.initialize();
-
-comandos();
+comandos(); // Carga comandos personalizados

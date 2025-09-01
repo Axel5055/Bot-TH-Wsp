@@ -1,9 +1,10 @@
-const sony = require('../bot/client');
+const sony = require("../bot/client");
+const chalk = require("chalk");
 
 function consola() {
     console.clear();
-    console.log(`
-        
+
+    const banner = `
 ╭━━━╮╱╱╱╱╱╱╱╱╱╱╭━━━╮
 ┃╭━╮┃╱╱╱╱╱╱╱╱╱╱┃╭━╮┃╱╱╱╱╭╮
 ┃╰━━┳━━┳━╮╭╮╱╭╮┃╰━╯┣━┳━━╋╋━━┳━━╮
@@ -18,14 +19,19 @@ function consola() {
 ╱╱┃┃┃╭┫┃┃┃┃━┫┃╭━╮┃┃┃┃╭╮┫┃┃┃━┫╭╯
 ╱╱┃┃┃┃┃╰╯┃┃━┫┃┃╱┃┃╰╯┃┃┃┃╰┫┃━┫┃
 ╱╱╰╯╰╯╰━━┻━━╯╰╯╱╰┻━━┻╯╰┻━┻━━┻╯
+    `;
 
-                                  `)
-  };
+    console.log(chalk.cyan.bold(banner));
+    console.log(chalk.green("🚀 Bot iniciado correctamente\n"));
+}
 
-  sony.on('message', async (msg) => {
-    if (msg.from.endsWith('@g.us')) {
-        console.log('Grupo ID:', msg.from);
+// ✅ Escuchar mensajes de grupos
+sony.on("message", async (msg) => {
+    if (msg.from.endsWith("@g.us")) {
+        console.log(
+            chalk.yellow("📢 Grupo detectado: ") + chalk.cyan(msg.from)
+        );
     }
 });
-  
-  module.exports = consola;
+
+module.exports = consola;

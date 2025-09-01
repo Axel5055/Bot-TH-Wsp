@@ -3,7 +3,7 @@ const sony = require("../../bot/client");
 async function evento(message) {
     const lowercase = message.body.toLowerCase();
 
-    if (lowercase === '/evento') {
+    if (lowercase === '/XXXeveXX') {
         const chat = await message.getChat();
 
         if (chat.isGroup) {
