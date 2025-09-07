@@ -30,6 +30,7 @@ async function comandos() {
         '../commands/menus',
         '../commands/mobs',
         '../commands/reportes',
+        '../commands/multicuentas',
     ];
 
     // Cargar todos los módulos de los directorios listados
