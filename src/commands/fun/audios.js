@@ -1,40 +1,77 @@
 const sony = require("../../bot/client");
 const { MessageMedia } = require("whatsapp-web.js");
-const th = require("consola");
+const fs = require("fs").promises;
 const path = require("path");
-const fs = require("fs");
+const logger = require("../utils/logger"); // usa tu logger centralizado
 
-// Listas de palabras clave
-const palabrasClaveIncluidas = ["suegra", "queman", "cariñosas", "dejen dormir", "mucho mensaje" , "borojojo", "no te vayas", "siuu", "sapo", "bañate", "ricco", "pal bot", "veneca", "habla bien", "pelea"];
-const palabrasClaveExactas = ["alv", "putos", "jijiji", "abuela", "maldita fdg", "hdp", "r4", "boo"]; // Define las palabras clave exactas
-const carpetaAudios = "./src/assets/audios";
+// 📂 Carpeta de audios
+const carpetaAudios = path.resolve("./src/assets/audios");
 
+// 🎯 Mapeo de palabras clave -> archivo de audio
+const palabrasClave = {
+    // Coincidencia parcial
+    suegra: "suegra.mp3",
+    queman: "queman.mp3",
+    cariñosas: "cariñosas.mp3",
+    "dejen dormir": "dejen dormir.mp3",
+    "mucho mensaje": "mucho mensaje.mp3",
+    borojojo: "borojojo.mp3",
+    "no te vayas": "no te vayas.mp3",
+    siuu: "siuu.mp3",
+    sapo: "sapo.mp3",
+    bañate: "banate.mp3",
+    ricco: "ricco.mp3",
+    "pal bot": "pal bot.mp3",
+    veneca: "veneca.mp3",
+    "habla bien": "habla bien.mp3",
+    pelea: "pelea.mp3",
+
+    // Coincidencia exacta
+    alv: "alv.mp3",
+    putos: "putos.mp3",
+    jijiji: "jijiji.mp3",
+    abuela: "abuela.mp3",
+    "maldita fdg": "maldita fdg.mp3",
+    hdp: "hdp.mp3",
+    r4: "r4.mp3",
+    boo: "boo.mp3",
+};
+
+// 🔧 Normalizador
+function normalizarTexto(texto) {
+    return texto.toLowerCase().trim();
+}
+
+// 🔍 Buscar palabra clave
+function detectarPalabraClave(mensaje) {
+    const msg = normalizarTexto(mensaje);
+
+    // Coincidencia exacta
+    if (palabrasClave[msg]) return msg;
+
+    // Coincidencia parcial
+    return Object.keys(palabrasClave).find((clave) => msg.includes(clave));
+}
+
+// 📲 Enviar audio
 async function enviarAudio(message) {
-    const lowercase = message.body.toLowerCase().trim();
-
     try {
-        let palabraEncontrada = null;
-        
-        // Buscar si el mensaje es exactamente una de las palabras clave exactas
-        if (palabrasClaveExactas.includes(lowercase)) {
-            palabraEncontrada = lowercase;
-        } else {
-            // Buscar si alguna palabra clave está dentro del mensaje
-            palabraEncontrada = palabrasClaveIncluidas.find(palabra => lowercase.includes(palabra));
-        }
+        const clave = detectarPalabraClave(message.body);
+        if (!clave) return;
 
-        if (palabraEncontrada) {
-            const archivoAudio = path.join(carpetaAudios, `${palabraEncontrada}.mp3`);
+        const archivoAudio = path.join(carpetaAudios, palabrasClave[clave]);
 
-            if (fs.existsSync(archivoAudio)) {
-                const audio = MessageMedia.fromFilePath(archivoAudio);
-                await sony.sendMessage(message.from, audio, { sendAudioAsVoice: true });
-            } else {
-                th.warn(`⚠️ No se encontró el archivo: ${archivoAudio}`);
-            }
+        try {
+            await fs.access(archivoAudio);
+            const audio = MessageMedia.fromFilePath(archivoAudio);
+
+            await sony.sendMessage(message.from, audio, { sendAudioAsVoice: true });
+            logger.success(`🎵 Audio enviado: "${palabrasClave[clave]}" (clave: "${clave}") a ${message.from}`);
+        } catch {
+            logger.warn(`⚠️ No se encontró el archivo: ${archivoAudio}`);
         }
     } catch (error) {
-        th.warn(`⚠️ Error al enviar el audio para el mensaje: "${message.body}"`);
+        logger.error(`❌ Error al procesar mensaje "${message.body}": ${error.message}`);
     }
 }
 

@@ -1,38 +1,48 @@
-const { MessageMedia } = require('whatsapp-web.js');
+const { MessageMedia } = require("whatsapp-web.js");
 const hispamemes = require("hispamemes");
-const th = require("consola");
+const logger = require("../utils/logger");
 
+/**
+ * Maneja el comando !meme
+ * @param {import("whatsapp-web.js").Message} message
+ */
 async function meme(message) {
     try {
-        // Asegurarse que sea un mensaje de texto
         if (!message.body) return;
 
-        const lowercase = message.body.toLowerCase();
-
-        if (lowercase !== 'meme') return; // salir si no es el comando
+        const command = message.body.toLowerCase().trim();
+        if (command !== "meme") return; // salir si no es el comando exacto
 
         const chat = await message.getChat();
 
-        // Obtener el meme y validar que sea URL
-        let momo;
+        // Obtener meme
+        let memeUrl;
         try {
-            momo = hispamemes.meme();
-            if (!momo || !/^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i.test(momo)) {
-                throw new Error('URL no valida');
+            memeUrl = hispamemes.meme();
+
+            // Validar que la URL sea de imagen
+            const validUrl = /^https?:\/\/.+\.(jpg|jpeg|png|gif)$/i.test(memeUrl);
+            if (!memeUrl || !validUrl) {
+                throw new Error("URL de meme no válida");
             }
         } catch (err) {
-            th.warn('No se pudo generar un meme válido:', err.message);
-            await message.reply('Ocurrió un error al generar el meme. Intenta nuevamente 🪷');
-            return; // salir sin afectar al bot
+            logger.warn("⚠️ No se pudo generar un meme válido:", err.message);
+            await message.reply("❌ No pude conseguir un meme ahora mismo, inténtalo más tarde 🪷");
+            return;
         }
 
-        const momazo = await MessageMedia.fromUrl(momo);
-        await chat.sendMessage(momazo);
-
+        // Convertir a media de WhatsApp
+        try {
+            const media = await MessageMedia.fromUrl(memeUrl, { unsafeMime: true });
+            await chat.sendMessage(media);
+            logger.success(`✅ Meme enviado: ${memeUrl}`);
+        } catch (err) {
+            logger.error("❌ Error al enviar el meme:", err.message);
+            await message.reply("⚠️ Hubo un problema enviando el meme. Intenta otra vez 🙏");
+        }
     } catch (error) {
         // Captura errores inesperados
-        th.error('Error inesperado en el comando meme:', error);
-        // Aquí no hacemos throw, así que el bot sigue corriendo
+        logger.error("🔥 Error inesperado en el comando meme:", error);
     }
 }
 

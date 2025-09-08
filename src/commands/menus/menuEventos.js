@@ -1,14 +1,17 @@
 const sony = require("../../bot/client");
-const th = require("consola");
+const logger = require("../utils/logger"); // Logger centralizado
+
+const COMMANDS = ['/meventos'];
 
 async function menuEventos(message) {
     const lowercase = message.body.toLowerCase();
 
+    if (!COMMANDS.includes(lowercase)) return; // Ignora mensajes que no son el comando
+
     try {
-        if (lowercase === '/meventos') {
-            sony.sendMessage(
-                message.from, 
-                `*🦊 TH BOT 🦊*
+        await sony.sendMessage(
+            message.from,
+            `*🦊 TH BOT 🦊*
 
 ---------------->> 
 | **COMANDOS EVENTOS** |
@@ -20,11 +23,11 @@ async function menuEventos(message) {
 ---------------->> 
 
 🅣🅗 ​ - ​ 🅑🅞🅣`
-                
-            );
-        }
+        );
+
+        logger.info(`Menú de eventos enviado a ${message.from}`);
     } catch (error) {
-        th.warn('⚠️ Error en menu.js al enviar el menuEventos');
+        logger.error('Error en menuEventos.js al enviar el menú de eventos', error);
     }
 }
 

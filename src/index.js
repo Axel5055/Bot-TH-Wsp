@@ -2,30 +2,28 @@
 // 📌 Dependencias principales
 // ===============================
 const qrcode = require('qrcode-terminal');
-const chalk = require('chalk');
-const th = require("consola");
 const moment = require('moment-timezone');
 
 // 📌 Archivos locales
 const comandos = require('./bot/comandos');
-const consol = require('./utils/log');
+const logger = require('./commands/utils/logger'); // <-- Logger centralizado
 const discord = require('./commands/discord');
 const sony = require('./bot/client');
 
 // ===============================
-// 🎨 Estilos de consola
+// 🎨 Estilos de consola centralizados
 // ===============================
 const log = {
-    info: (msg) => th.info(chalk.blueBright(msg)),
-    success: (msg) => th.success(chalk.greenBright(msg)),
-    warn: (msg) => th.warn(chalk.yellowBright(msg)),
-    error: (msg) => th.error(chalk.redBright(msg)),
+    info: (msg) => logger.info(msg),
+    success: (msg) => logger.success ? logger.success(msg) : logger.info(msg),
+    warn: (msg) => logger.warn(msg),
+    error: (msg) => logger.error(msg),
     banner: () => {
-        console.log(chalk.cyanBright.bold(`
+        logger.info(`
 ================================================
          🚀  TH PROJECT - WhatsApp Bot 🚀
 ================================================
-        `));
+        `);
     }
 };
 
@@ -60,7 +58,10 @@ sony.on("qr", qr => {
 sony.on("ready", async () => {
     log.success(`🤖 Cliente activo y listo a las ${getHourMX()}`);
     
-    consol(); // Ejecuta logs personalizados
+    // Ejecuta logs personalizados si existen
+    if (typeof require('./utils/log') === 'function') {
+        require('./utils/log')();
+    }
 
     // Mensajes automáticos a números definidos
     const send_message = ["5538901631"];
@@ -88,7 +89,7 @@ sony.on('loading_screen', (percent, message) => {
 
 // 🌐 Estado de conexión
 sony.on('change_state', state => {
-    log.info(`🌍 Estado de conexión: ${chalk.bold(state)}`);
+    log.info(`🌍 Estado de conexión: ${state}`);
 });
 
 // ❌ Cliente desconectado y reconexión automática

@@ -1,4 +1,5 @@
 const sony = require("../../bot/client");
+const logger = require("../utils/logger");
 
 const REGLAS_GRUPO = `
 *📜 REGLAMENTO DEL GRUPO 📜*
@@ -11,7 +12,7 @@ const REGLAS_GRUPO = `
 |  🦊 > No discriminar a nadie por sus preferencias de cualquier tipo.
 |
 ---------------->>
-| *¿QUÉ SI ESTÁ PERMITIDO?*
+| *¿QUÉ SÍ ESTÁ PERMITIDO?*
 |
 |  🦊 > Pedir ayuda sobre temas del juego y gremio. (spam, escudos, etc).
 |  🦊 > Venta de sus cuentas sin hacer spam, solamente.
@@ -24,20 +25,26 @@ POR SU ATENCIÓN, GRACIAS.
 `;
 
 async function reglas(message) {
-    const lowercase = message.body.toLowerCase();
+    try {
+        const body = message.body?.toLowerCase().trim();
+        if (body !== "/reglas") return;
 
-    if (lowercase === '/reglas') {
         const chat = await message.getChat();
 
-        // Depuración: Verifica el ID del chat
-        console.log("ID del chat:", chat.id);
+        // Depuración opcional
+        logger.debug(`Comando /reglas recibido en chat: ${chat.id._serialized}`);
 
-        // Verifica si el chat es un grupo basado en el formato del ID
-        if (chat.id.server === 'g.us') {  // Los chats de grupo en WhatsApp suelen tener 'g.us' como servidor
+        // Verifica si es un grupo (los IDs de grupo suelen terminar con 'g.us')
+        if (chat.id._serialized.endsWith("g.us")) {
             await sony.sendMessage(message.from, REGLAS_GRUPO);
+            logger.success(`✅ Enviado reglamento al grupo ${chat.name || chat.id._serialized}`);
         } else {
-            message.reply('*¡Este comando solo se puede usar en un grupo!*');
+            await message.reply("*⚠️ Este comando solo se puede usar en un grupo.*");
+            logger.warn(`Intento de usar /reglas en chat privado: ${chat.id._serialized}`);
         }
+    } catch (error) {
+        logger.error("❌ Error al procesar el comando /reglas:", error);
+        await message.reply("*⚠️ Ocurrió un error al procesar el comando. Intenta nuevamente.*");
     }
 }
 

@@ -1,31 +1,35 @@
 const sony = require("../../bot/client");
-const th = require("consola");
+const logger = require("../utils/logger"); // Logger centralizado
+
+const COMMANDS = ['/mescudos'];
 
 async function menuEscudos(message) {
     const lowercase = message.body.toLowerCase();
 
+    if (!COMMANDS.includes(lowercase)) return; // Ignora mensajes que no son el comando
+
     try {
-        if (lowercase === '/mescudos') {
-            sony.sendMessage(
-                message.from, 
-                `*🦊 TH BOT 🦊*
+        await sony.sendMessage(
+            message.from,
+            `*🦊 TH BOT 🦊*
 
 ---------------->> 
 | **COMANDOS ESCUDOS** |
 ---------------->>
 
-|  🦊 > */addescudo [Nick] [Numero]* - Si no estas registrado usa este comando.
+|  🦊 > */helpescudo* - Guía de cómo usar los comandos
+|  🦊 > */addescudo [Nick] [Número]* - Si no estás registrado, úsalo
 |  🦊 > */escudo [Nick]* - Avisar de escudo caído
-|  🦊 > */list* - Lista de los usuarios registrados.
-|  🦊 > */editescudo [Nick Anterior] [Nick Nuevo] [Número]* - Elimina el registro de la lista de escudos.
-|  🦊 > */deleteescudo [Nick]* - Elimina el registro de la lista de escudos.
+|  🦊 > */list* - Lista de los usuarios registrados
+|  🦊 > */editescudo [Nick Anterior] [Nick Nuevo] [Número]* - Edita un registro
+|  🦊 > */deleteescudo [Nick]* - Elimina un registro
 
 🅣🅗 ​ - ​ 🅑🅞🅣`
-                
-            );
-        }
+        );
+
+        logger.info(`Menú de escudos enviado a ${message.from}`);
     } catch (error) {
-        th.warn('⚠️ Error en menu.js al enviar el menuEventos');
+        logger.error('Error en menuEscudos.js al enviar el menú de escudos', error);
     }
 }
 

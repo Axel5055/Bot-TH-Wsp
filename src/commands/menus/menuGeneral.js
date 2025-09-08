@@ -1,14 +1,17 @@
 const sony = require("../../bot/client");
-const th = require("consola");
+const logger = require("../utils/logger"); // Logger centralizado
+
+const COMMANDS = ['/mgeneral'];
 
 async function menuGeneral(message) {
     const lowercase = message.body.toLowerCase();
 
+    if (!COMMANDS.includes(lowercase)) return; // Ignora mensajes que no son el comando
+
     try {
-        if (lowercase === '/mgeneral') {
-            sony.sendMessage(
-                message.from, 
-                `*🦊 TH BOT 🦊*
+        await sony.sendMessage(
+            message.from,
+            `*🦊 TH BOT 🦊*
 
 ---------------->> 
 | **COMANDOS GENERALES** |
@@ -22,11 +25,11 @@ async function menuGeneral(message) {
 ---------------->> 
 
 🅣🅗 ​ - ​ 🅑🅞🅣`
-                
-            );
-        }
+        );
+
+        logger.info(`Menú general enviado a ${message.from}`);
     } catch (error) {
-        th.warn('⚠️ Error en menu.js al enviar el menuGeneral');
+        logger.error('Error en menuGeneral.js al enviar el menú general', error);
     }
 }
 

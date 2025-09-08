@@ -1,18 +1,20 @@
 const sony = require("../../bot/client");
 const { MessageMedia } = require('whatsapp-web.js');
-const th = require("consola");
+const logger = require("../utils/logger"); // <- Logger centralizado
+
+const MENU_IMAGE_PATH = './src/assets/img/bot.jpg';
+const COMMANDS = ['/menu', '/menú', '/help'];
 
 async function menu(message) {
     const lowercase = message.body.toLowerCase();
-    const media = MessageMedia.fromFilePath('./src/assets/img/bot.jpg');
+
+    if (!COMMANDS.includes(lowercase)) return; // Ignora mensajes que no son del menú
 
     try {
-        if (lowercase === '/menu' || lowercase === '/menú' || lowercase === '/help') {
-            sony.sendMessage(
-                message.from, 
-                media, 
-                {
-                    caption: `*🦊 TH BOT 🦊*
+        const media = MessageMedia.fromFilePath(MENU_IMAGE_PATH);
+
+        await sony.sendMessage(message.from, media, {
+            caption: `*🦊 TH BOT 🦊*
 ---------------->> 
 *MENUS DISPONIBLES:*
 ---------------->> 
@@ -20,17 +22,18 @@ async function menu(message) {
 |  🦊 > */mgeneral*  - Menú comandos generales |
 |  🦊 > */meventos* - Menú de eventos (fdg, arena, etc.) |
 |  🦊 > */mcaceria* - Menú Cacería/Evento Interno |
-|  🦊 > */mall* - Menú Invocar/Escudos |
+|  🦊 > */mtodos* - Menú de menciones |
 |  🦊 > */marmaduras* - Menú Armaduras |
 |  🦊 > */mreportes* - Menú de Reportes |
 |  🦊 > */mescudos* - Menú de Escudos |
+|  🦊 > */mcuentas* - Menú de Multicuentas |
 
 🅣🅗 ​ - ​ 🅑🅞🅣`
-                }
-            );
-        }
+        });
+
+        logger.success(`Menú enviado a ${message.from}`); // Registro exitoso
     } catch (error) {
-        th.warn('⚠️ Error en menu.js al enviar el menú');
+        logger.error('Error en menu.js al enviar el menú', error);
     }
 }
 

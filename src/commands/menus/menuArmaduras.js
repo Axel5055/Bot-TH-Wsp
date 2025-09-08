@@ -1,14 +1,17 @@
 const sony = require("../../bot/client");
-const th = require("consola");
+const logger = require("../utils/logger"); // Logger centralizado
+
+const COMMANDS = ['/marmaduras'];
 
 async function menuArmaduras(message) {
     const lowercase = message.body.toLowerCase();
 
+    if (!COMMANDS.includes(lowercase)) return; // Ignora mensajes que no son el comando
+
     try {
-        if (lowercase === '/marmaduras') {
-            sony.sendMessage(
-                message.from, 
-                `*🦊 TH BOT 🦊*
+        await sony.sendMessage(
+            message.from,
+            `*🦊 TH BOT 🦊*
 
 ---------------->> 
 | **COMANDOS ARMADURAS** |
@@ -23,11 +26,11 @@ async function menuArmaduras(message) {
 ---------------->> 
 
 🅣🅗 ​ - ​ 🅑🅞🅣`
-                
-            );
-        }
+        );
+
+        logger.info(`Menú de armaduras enviado a ${message.from}`);
     } catch (error) {
-        th.warn('⚠️ Error en menu.js al enviar el menuEventos');
+        logger.error('Error en menuArmaduras.js al enviar el menú de armaduras', error);
     }
 }
 

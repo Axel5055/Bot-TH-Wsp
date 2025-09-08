@@ -1,14 +1,17 @@
 const sony = require("../../bot/client");
-const th = require("consola");
+const logger = require("../utils/logger"); // Logger centralizado
+
+const COMMANDS = ['/mobs'];
 
 async function mobs(message) {
     const lowercase = message.body.toLowerCase();
 
+    if (!COMMANDS.includes(lowercase)) return; // Ignora mensajes que no son el comando
+
     try {
-        if (lowercase === '/mobs') {
-            sony.sendMessage(
-                message.from, 
-                `*🦊 TH BOT 🦊*
+        await sony.sendMessage(
+            message.from,
+            `*🦊 TH BOT 🦊*
 
 ---------------->> 
 | **LISTA DE MOBS** |
@@ -42,11 +45,11 @@ async function mobs(message) {
 ---------------->> 
 
 🅣🅗 ​ - ​ 🅑🅞🅣`
-                
-            );
-        }
+        );
+
+        logger.info(`Lista de mobs enviada a ${message.from}`);
     } catch (error) {
-        th.warn('⚠️ Error en menu.js al enviar mobs');
+        logger.error('Error en mobs.js al enviar la lista de mobs', error);
     }
 }
 

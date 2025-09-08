@@ -1,17 +1,20 @@
 const sony = require("../../bot/client");
-const th = require("consola");
+const logger = require("../utils/logger"); // Logger centralizado
+
+const COMMANDS = ['/matodos'];
 
 async function menuTodos(message) {
     const lowercase = message.body.toLowerCase();
 
+    if (!COMMANDS.includes(lowercase)) return; // Ignora mensajes que no son el comando
+
     try {
-        if (lowercase === '/mall') {
-            sony.sendMessage(
-                message.from, 
-                `*🦊 TH BOT 🦊*
+        await sony.sendMessage(
+            message.from,
+            `*🦊 TH BOT 🦊*
 
 ---------------->> 
-| **COMANDOS PARA INVOAR AL GRUPO Y ESCUDOS** |
+| **COMANDOS PARA INVOCAR AL GRUPO Y ESCUDOS** |
 ---------------->>
 
 |  🦊 > */rally* - Invocando Fillers |
@@ -23,11 +26,11 @@ async function menuTodos(message) {
 ---------------->> 
 
 🅣🅗 ​ - ​ 🅑🅞🅣`
-                
-            );
-        }
+        );
+
+        logger.info(`Menú de invocación y escudos enviado a ${message.from}`);
     } catch (error) {
-        th.warn('⚠️ Error en menu.js al enviar el menuEventos');
+        logger.error('Error en menuTodos.js al enviar el menú de invocación y escudos', error);
     }
 }
 
