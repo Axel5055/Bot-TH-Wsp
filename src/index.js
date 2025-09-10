@@ -9,6 +9,7 @@ const comandos = require('./bot/comandos');
 const logger = require('./commands/utils/logger'); // <-- Logger centralizado
 const discord = require('./commands/discord');
 const sony = require('./bot/client');
+const traductor = require("./commands/traductor");
 
 // ===============================
 // 🎨 Estilos de consola centralizados
@@ -76,6 +77,8 @@ sony.on("ready", async () => {
             log.error(`❌ Error al enviar mensaje a ${number}: ${error}`);
         }
     }
+
+    traductor();
 });
 
 // ⏳ Pantalla de carga
@@ -103,4 +106,4 @@ sony.on('disconnected', (reason) => {
 // 🚀 Iniciar cliente
 // ===============================
 sony.initialize();
-comandos(); // Carga comandos personalizados
+comandos(); // Carga comandos personalizado

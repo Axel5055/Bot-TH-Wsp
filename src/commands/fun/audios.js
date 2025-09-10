@@ -2,7 +2,7 @@ const sony = require("../../bot/client");
 const { MessageMedia } = require("whatsapp-web.js");
 const fs = require("fs").promises;
 const path = require("path");
-const logger = require("../utils/logger"); // usa tu logger centralizado
+const logger = require("../utils/logger");
 
 // 📂 Carpeta de audios
 const carpetaAudios = path.resolve("./src/assets/audios");
@@ -25,7 +25,7 @@ const palabrasClave = {
     veneca: "veneca.mp3",
     "habla bien": "habla bien.mp3",
     pelea: "pelea.mp3",
-
+    
     // Coincidencia exacta
     alv: "alv.mp3",
     putos: "putos.mp3",
@@ -46,11 +46,14 @@ function normalizarTexto(texto) {
 function detectarPalabraClave(mensaje) {
     const msg = normalizarTexto(mensaje);
 
-    // Coincidencia exacta
-    if (palabrasClave[msg]) return msg;
+    // Primero revisamos coincidencias exactas
+    const exactas = ["alv","putos","jijiji","abuela","maldita fdg","hdp","r4","boo"];
+    const exactaEncontrada = exactas.find(clave => msg === clave);
+    if (exactaEncontrada) return exactaEncontrada;
 
-    // Coincidencia parcial
-    return Object.keys(palabrasClave).find((clave) => msg.includes(clave));
+    // Luego coincidencias parciales
+    const parciales = Object.keys(palabrasClave).filter(clave => !exactas.includes(clave));
+    return parciales.find(clave => msg.includes(clave));
 }
 
 // 📲 Enviar audio
