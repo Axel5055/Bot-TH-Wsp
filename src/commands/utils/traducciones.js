@@ -9,11 +9,13 @@ const traduccionesManual = {
     labyrinth: 'Laberinto',
     tycoon: 'Magnate',
     artifact: 'Artefactos',
-    red_orb: 'Orbe Rojo',
-    yellow_orb: 'Orbe Amarillo',
+    bright_talent_orb: 'Orbe Rojo',
+    brilliant_talent_orb: 'Orbe Amarillo',
     chaos_dragon: 'Dragón del Caos',
     ancient_core: 'Núcleo Antiguo',
     chaos_core: 'Núcleo del Caos',
+    merge_pacts: 'Fusionar Pactos',
+    train_soldiers: 'Entrenar soldados'
 };
 
 /**

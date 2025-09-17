@@ -45,6 +45,12 @@ async function sendWelcomeMessage(chatId, caption, mentions = []) {
     }
 }
 
+// Función para validar grupo permitido
+function isAllowedGroup(chatId) {
+    const allowedId = process.env.WHATSAPP_GROUP_ID?.trim();
+    return allowedId && chatId === allowedId;
+}
+
 // Comando /welcome manual
 async function welcomeCommand(message) {
     const body = message.body?.toLowerCase().trim();
@@ -58,6 +64,12 @@ async function welcomeCommand(message) {
             return;
         }
 
+        // Filtrar solo el grupo permitido
+        if (!isAllowedGroup(chat.id._serialized)) {
+            await message.reply("*⚠️ Este comando solo está habilitado en el grupo principal.*");
+            return;
+        }
+
         await sendWelcomeMessage(chat.id._serialized, MENSAJE_WELCOME);
     } catch (error) {
         logger.error("❌ Error al procesar el comando /welcome:", error);
@@ -68,6 +80,10 @@ async function welcomeCommand(message) {
 // Evento de ingreso al grupo
 sony.on("group_join", async (notification) => {
     const chatId = notification.id.remote;
+
+    // Solo enviar al grupo definido
+    if (!isAllowedGroup(chatId)) return;
+
     const newParticipantId = notification.id.participant;
 
     try {

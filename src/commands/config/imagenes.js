@@ -3,8 +3,8 @@
 const path = require('path');
 
 const IMAGENES_ALERTAS = {
-    red_orb: 'red_orbe.jpg',
-    yellow_orb: 'yellow_orb.jpg',
+    bright_talent_orb: 'red_orbe.jpg',
+    brilliant_talent_orb: 'yellow_orb.jpg',
     watcher: 'watcher.jpg',
     ancient_core: 'ancient_core.jpg',
     chaos_core: 'chaos_core.jpg',
@@ -18,7 +18,7 @@ const IMAGENES_ALERTAS = {
  */
 function getImagenPath(key) {
     if (IMAGENES_ALERTAS[key]) {
-        return path.join(__dirname, '../assets/img/alertas', IMAGENES_ALERTAS[key]);
+        return path.join(__dirname, '../../assets/img/alertas', IMAGENES_ALERTAS[key]);
     }
     return null;
 }

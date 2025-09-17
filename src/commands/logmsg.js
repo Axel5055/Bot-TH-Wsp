@@ -48,6 +48,7 @@ async function logmsg(message) {
         if (chat.isGroup) {
             const baseData = {
                 Grupo: c.cyan(chat.name),
+                 "ID del Grupo": c.green(chat.id._serialized), // 👈 aquí agregamos el ID
                 Número: c.green(message.author),
                 Usuario: c.blue(notifyName),
                 Mensaje: charCount < 1999 ? c.yellow(body) : "[Mensaje largo]",
