@@ -10,7 +10,8 @@ const countries = {
     "japon": { tz: "Asia/Tokyo", flag: "🇯🇵", abbr: ["JP"] },
     "china": { tz: "Asia/Shanghai", flag: "🇨🇳", abbr: ["CN"] },
     "estados unidos": { tz: "America/New_York", flag: "🇺🇸", abbr: ["US", "EEUU"] },
-    "venezuela": { tz: "America/Caracas", flag: "🇻🇪", abbr: ["VEN"] }
+    "venezuela": { tz: "America/Caracas", flag: "🇻🇪", abbr: ["VEN"] },
+    "italia": { tz: "Europe/Rome", flag: "🇮🇹", abbr: ["IT"] }
     // Agrega más países/abreviaturas según necesites
 };
 

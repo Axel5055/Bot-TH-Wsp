@@ -31,7 +31,7 @@ async function handleError(error, message) {
 // Obtener respuesta de OpenAI
 async function getOpenAIResponse(prompt, context = []) {
     const completion = await openai.chat.completions.create({
-        model: "gpt-4.1",
+        model: "gpt-4.1-nano-2025-04-14",
         messages: [
             { role: "system", content: SYSTEM_PROMPT },
             ...context,

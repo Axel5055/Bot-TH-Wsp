@@ -15,7 +15,8 @@ const traduccionesManual = {
     ancient_core: 'Núcleo Antiguo',
     chaos_core: 'Núcleo del Caos',
     merge_pacts: 'Fusionar Pactos',
-    train_soldiers: 'Entrenar soldados'
+    train_soldiers: 'Entrenar soldados',
+    kingdom_tycoon: 'Magnate'
 };
 
 /**
