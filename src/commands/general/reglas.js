@@ -1,27 +1,24 @@
 const sony = require("../../bot/client");
 const logger = require("../utils/logger");
 
+// 🔹 Texto del reglamento separado y ordenado
 const REGLAS_GRUPO = `
 *📜 REGLAMENTO DEL GRUPO 📜*
 
----------------->>
-|  🦊 > Respeto ante todo.
-|  🦊 > No usar stickers ni subir links +18.
-|  🦊 > No hacer spam con los comandos del bot.
-|  🦊 > No se tolera el racismo.
-|  🦊 > No discriminar a nadie por sus preferencias de cualquier tipo.
-|
----------------->>
-| *¿QUÉ SÍ ESTÁ PERMITIDO?*
-|
-|  🦊 > Pedir ayuda sobre temas del juego y gremio. (spam, escudos, etc).
-|  🦊 > Venta de sus cuentas sin hacer spam, solamente.
-|  🦊 > Publicar eventos de cacería.
-|
----------------->>
+🔒 *Normas:*
+🦊 Respeto ante todo.  
+🦊 Prohibido stickers o links +18.  
+🦊 Evita el spam con los comandos del bot.  
+🦊 No se tolera el racismo.  
+🦊 No discriminar a nadie por sus preferencias.  
 
-POR SU ATENCIÓN, GRACIAS.
-🅣🅗 ​ - ​ 🅑🅞🅣
+✅ *Sí está permitido:*
+🦊 Pedir ayuda sobre temas del juego y gremio (spam, escudos, etc).  
+🦊 Venta de cuentas (sin spam).  
+🦊 Publicar eventos de cacería.  
+
+POR SU ATENCIÓN, GRACIAS.  
+🅣🅗 - 🅑🅞🅣
 `;
 
 async function reglas(message) {
@@ -30,20 +27,17 @@ async function reglas(message) {
         if (body !== "/reglas") return;
 
         const chat = await message.getChat();
+        const isGroup = chat.isGroup || chat.id._serialized.endsWith("g.us");
 
-        // Depuración opcional
-        logger.debug(`Comando /reglas recibido en chat: ${chat.id._serialized}`);
-
-        // Verifica si es un grupo (los IDs de grupo suelen terminar con 'g.us')
-        if (chat.id._serialized.endsWith("g.us")) {
-            await sony.sendMessage(message.from, REGLAS_GRUPO);
-            logger.success(`✅ Enviado reglamento al grupo ${chat.name || chat.id._serialized}`);
+        if (isGroup) {
+            await sony.sendMessage(message.from, { text: REGLAS_GRUPO });
+            logger.success(`✅ Reglamento enviado al grupo: ${chat.name || chat.id._serialized}`);
         } else {
             await message.reply("*⚠️ Este comando solo se puede usar en un grupo.*");
-            logger.warn(`Intento de usar /reglas en chat privado: ${chat.id._serialized}`);
+            logger.warn(`⚠️ Intento de usar /reglas en privado: ${chat.id._serialized}`);
         }
     } catch (error) {
-        logger.error("❌ Error al procesar el comando /reglas:", error);
+        logger.error("❌ Error en comando /reglas:", error);
         await message.reply("*⚠️ Ocurrió un error al procesar el comando. Intenta nuevamente.*");
     }
 }

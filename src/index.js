@@ -7,8 +7,9 @@ const moment = require('moment-timezone');
 // 📌 Archivos locales
 const comandos = require('./bot/comandos');
 const logger = require('./commands/utils/logger'); // <-- Logger centralizado
-const discord = require('./commands/discord');
+// const discord = require('./commands/discord');
 const sony = require('./bot/client');
+require('./services/telegram'); // ⚡ Arranca el listener de Telegram
 
 // ===============================
 // 🎨 Estilos de consola centralizados
@@ -33,9 +34,9 @@ const log = {
 const getHourMX = () => moment().tz("America/Mexico_City").format('HH:mm:ss');
 
 // ===============================
-// 📌 Inicializar Discord (se llama solo una vez)
+// 📌 Inicializar Telegram (se llama solo una vez)
 // ===============================
-discord();
+// discord();
 
 // ===============================
 // 📌 Eventos del cliente WhatsApp
@@ -64,7 +65,7 @@ sony.on("ready", async () => {
     }
 
     // Mensajes automáticos a números definidos
-    const send_message = ["5538901631"];
+    const send_message = ["5215538901631"];
     for (const number of send_message) {
         const chatId = `${number}@c.us`;
         const message = `*_Come at me_*!! \n⏰ Tiempo MX: ${getHourMX()}\n_Sr. Courtesy_`;

@@ -1,37 +1,44 @@
 const sony = require("../../bot/client");
 
 async function evento(message) {
-    const lowercase = message.body.toLowerCase();
+    const body = message.body?.toLowerCase().trim();
 
-    if (lowercase === '/XXXeveXX') {
+    if (body === "/evento") {
         const chat = await message.getChat();
 
-        if (chat.isGroup) {
-            sony.sendMessage(
-                message.from,
-                `*🎯 REGLAS DE EVENTO INTERNO DE CACERÍA 🎯*
-                
----------------->>
-📅 El evento de este mes es: *"EL MEJOR CAZADOR"*
+        if (!chat.isGroup) {
+            return message.reply("*⚠️ Este comando solo se puede usar en un grupo.*");
+        }
 
-🎯 Las bases son simples: el mejor cazador de este mes recibirá *499 DIAMANTES*. Solo se toman en cuenta monstruos de *nivel 2* en adelante.
+        // 🔹 Datos configurables (fácil de cambiar)
+        const eventoNombre = "EL MEJOR CAZADOR";
+        const premio = "499 💎 DIAMANTES";
+        const fechaFin = "6 de Octubre de 2025";
+        const requisito = "Monstruos de nivel 2 en adelante";
 
-⏳ La vigencia del evento es hasta el *11 de Mayo*.
+        // 🔹 Mensaje del evento
+        const mensajeEvento = `
+*🎯 REGLAS DEL EVENTO INTERNO DE CACERÍA 🎯*
 
-¡🏆 Suerte a todos y que gane el mejor! 🎉
----------------->>
+📅 Evento del mes: *${eventoNombre}*
 
-❓ Para cualquier duda o consulta sobre la información, pueden escribirme ✍️
+🏆 Premio: *${premio}*
 
-📜 Consulta las reglas de cacería fácilmente con el comando 👉 */caza*.
+⚔️ Requisito: *${requisito}*
+
+⏳ Vigencia: *Hasta el ${fechaFin}*
+
+🔥 ¡Demuestra tu habilidad y conviértete en el mejor cazador! 🔥
+
+❓ Para dudas o consultas pueden escribirme ✍️
+📜 Consulta las reglas de cacería fácilmente con 👉 */caza*
 
 *Gracias por su atención.*
 
-🅣🅗 ​ - ​ 🅑🅞🅣`
-            );
-        } else {
-            message.reply('*⚠️ ¡Este comando solo se puede usar en un grupo! ⚠️*');
-        }
+🅣🅗 - 🅑🅞🅣
+        `;
+
+        await sony.sendMessage(message.from, mensajeEvento);
     }
 }
 

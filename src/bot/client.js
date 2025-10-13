@@ -17,35 +17,35 @@ function getChromePath() {
     for (const p of winPaths) {
         if (fs.existsSync(p)) return p;
     }
-
-    // Si quieres agregar Linux/Mac puedes hacerlo aquí
     return null;
 }
 
 // Determinar executablePath
 let executablePath = getChromePath();
 if (!executablePath) {
-    // Usa Chromium de Puppeteer
+    console.log("⚡ No se encontró Chrome local, usando Chromium de Puppeteer");
     executablePath = puppeteer.executablePath();
-    console.log('⚡ Usando Chromium de Puppeteer:', executablePath);
+    if (!fs.existsSync(executablePath)) {
+        console.error("❌ Chromium de Puppeteer no encontrado. Instala Puppeteer completo:");
+        console.error("   npm install puppeteer");
+        process.exit(1);
+    }
 } else {
-    console.log('⚡ Usando Google Chrome local:', executablePath);
+    console.log("⚡ Usando Google Chrome local:", executablePath);
 }
 
 // Crear cliente de WhatsApp
 const sony = new Client({
-    authStrategy: new LocalAuth({
-        clientId: process.env.WA_CLIENT_ID || "Sony"
-    }),
+    authStrategy: new LocalAuth({ clientId: process.env.WA_CLIENT_ID || "Sony" }),
     puppeteer: {
         executablePath,
+        headless: HEADLESS,
         args: [
-            "--no-sandbox",
+            "--disable-dev-shm-usage",
             "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage"
+            "--no-sandbox",
         ],
         defaultViewport: { width: 800, height: 600 },
-        headless: HEADLESS,
         ignoreHTTPSErrors: true,
     },
     maxConcurrency: 1,
@@ -54,20 +54,9 @@ const sony = new Client({
     maxCachedMessages: 0,
 });
 
-sony.on('authenticated', () => {
-    console.log('✅ Autenticado correctamente!');
-});
-
-sony.on('ready', () => {
-    console.log('🤖 Bot listo y conectado!');
-});
-
-sony.on('auth_failure', (msg) => {
-    console.error('❌ Fallo en autenticación:', msg);
-});
-
-sony.on('disconnected', (reason) => {
-    console.log('⚠️ Desconectado:', reason);
-});
+sony.on('authenticated', () => console.log("✅ Autenticado correctamente!"));
+sony.on('ready', () => console.log("🤖 Bot listo y conectado!"));
+sony.on('auth_failure', (msg) => console.error("❌ Fallo en autenticación:", msg));
+sony.on('disconnected', (reason) => console.log("⚠️ Desconectado:", reason));
 
 module.exports = sony;

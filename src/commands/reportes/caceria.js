@@ -40,7 +40,7 @@ async function estadisticasIndividual(body, message) {
     const workbook = xlsx.readFile(FILE_PATH);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
-    const fechaReporte = sheet['L2']?.v || 'Fecha desconocida';
+    const fechaReporte = sheet['M2']?.v || 'Fecha desconocida';
 
     const userData = data.find(row => String(row['Nombre']).toLowerCase() === searchTerm.toLowerCase());
     if (!userData) {
@@ -86,9 +86,9 @@ Aquí están tus *Estadísticas de Cacería* 🤩
 async function estadisticasGeneral(message) {
     const workbook = xlsx.readFile(FILE_PATH);
     const sheet = workbook.Sheets[workbook.SheetNames[2]]; // Hoja 3
-    const totalCaza = sheet['D3']?.v || 0;
-    const niveles = ['E3','F3','G3','H3','I3'].map(cell => sheet[cell]?.v || 0);
-    const fechaReporte = sheet['L1']?.v || 'Fecha desconocida';
+    const totalCaza = sheet['E3']?.v || 0;
+    const niveles = ['F3','G3','H3','I3','J3'].map(cell => sheet[cell]?.v || 0);
+    const fechaReporte = sheet['M1']?.v || 'Fecha desconocida';
 
     const response = `👋 ¡Hola, cazadores! 👋
 Aquí te dejo las *Estadísticas de Cacería General* 🤩
@@ -178,12 +178,14 @@ async function top10Mensual(message) {
     });
 
     response += `\n🔥 ¡Sigan cazando y demostrando su habilidad! 💪\n`;
+    response += `\n🌟 *El mejor cazador del mes se llevará 499 💎 DIAMANTES.* 🌟\n`;
     response += `\n*Evento de Cacería - Mes de ${mesCapitalizado} ${anioActual}*`;
     response += `\n\n🅣🅗 ​ - ​ 🅑🅞🅣`;
 
     await sony.sendMessage(message.from, response);
     logger.success("✅ Ranking mensual enviado");
 }
+
 
 // ==========================
 // 🔹 Iconos aleatorios

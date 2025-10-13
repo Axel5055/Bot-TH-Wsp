@@ -16,7 +16,10 @@ const traduccionesManual = {
     chaos_core: 'Núcleo del Caos',
     merge_pacts: 'Fusionar Pactos',
     train_soldiers: 'Entrenar soldados',
-    kingdom_tycoon: 'Magnate'
+    kingdom_tycoon: 'Magnate',
+    queen_bee: 'Abeja Reina',
+    mega_maggot: 'Megalarva',
+    terrorthorn: 'Terrospín'
 };
 
 /**

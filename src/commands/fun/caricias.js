@@ -46,7 +46,7 @@ async function caricias(message) {
 
 ⚠️ Tu *estatus de caricias y apapachos* está en rojo ⚠️
 
-🛑 Debe colocarse al día
+🛑 Debe colocarse al día con el *LIDER*
 
 🔹 *Besos:* ${besos} 💋
 🔹 *Mensajes de buenos días:* ${buenosDias} 🌞

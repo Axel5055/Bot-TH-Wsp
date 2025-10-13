@@ -9,6 +9,8 @@ const IMAGENES_ALERTAS = {
     ancient_core: 'ancient_core.jpg',
     chaos_core: 'chaos_core.jpg',
     chaos_dragon: 'chaos_dragon.jpg',
+    queen_bee: 'abeja.jpg',
+    mega_maggot: 'megalarva.jpg'
 };
 
 /**
