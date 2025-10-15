@@ -14,6 +14,8 @@ Nos alegra tenerte con nosotros. Esperamos que te sientas cómodo(a) y disfrutes
 
 📝 Usa el comando [ */reglas* ] para conocer las normas del grupo. También puedes encontrarlas en la descripción del grupo.
 
+🏆 Al mejor cazador del mes se le regalarán *499 diamantes*.
+
 📝 Usa el comando [ */caza* ] para conocer las reglas de cacería.
 🦊 Usa el comando [ */menu* ó */help* ] para ver todos los comandos disponibles.
 
@@ -96,6 +98,8 @@ sony.on("group_join", async (notification) => {
 Nos alegra tenerte con nosotros, @${newParticipant.id.user}. Esperamos que te sientas cómodo(a) y disfrutes de la comunidad.
 
 📝 Usa el comando [ */reglas* ] para conocer las normas del grupo. También puedes encontrarlas en la descripción del grupo.
+
+🏆 Al mejor cazador del mes se le regalarán *499 diamantes*.
 
 📝 Usa el comando [ */caza* ] para conocer las reglas de cacería.
 🦊 Usa el comando [ */menu* ó */help* ] para ver todos los comandos disponibles.

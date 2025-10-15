@@ -13,7 +13,7 @@ async function evento(message) {
         // 🔹 Datos configurables (fácil de cambiar)
         const eventoNombre = "EL MEJOR CAZADOR";
         const premio = "499 💎 DIAMANTES";
-        const fechaFin = "6 de Octubre de 2025";
+        const fechaFin = "2 de Noviembre de 2025";
         const requisito = "Monstruos de nivel 2 en adelante";
 
         // 🔹 Mensaje del evento

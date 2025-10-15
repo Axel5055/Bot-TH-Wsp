@@ -10,7 +10,15 @@ const IMAGENES_ALERTAS = {
     chaos_core: 'chaos_core.jpg',
     chaos_dragon: 'chaos_dragon.jpg',
     queen_bee: 'abeja.jpg',
-    mega_maggot: 'megalarva.jpg'
+    mega_maggot: 'megalarva.jpg',
+    Noceros: 'noceros.jpg', 
+    bon_appeti: 'apetito.jpg',
+    gawrilla: 'gorilla.jpg',
+    necrosis: 'necrosis.jpg',
+    gryphon: 'grifo.jpg',
+    saberfang: 'saberfang.jpg',
+    blackwing: 'alanegra.jpg',
+    frostwing: 'alaescarcha.jpg'
 };
 
 /**
@@ -25,7 +33,15 @@ function getImagenPath(key) {
     return null;
 }
 
+function getImagenPathMobs(key) {
+    if (IMAGENES_ALERTAS[key]) {
+        return path.join(__dirname, '../../assets/img/mobs', IMAGENES_ALERTAS[key]);
+    }
+    return null;
+}
+
 module.exports = {
     IMAGENES_ALERTAS,
-    getImagenPath
+    getImagenPath,
+    getImagenPathMobs
 };

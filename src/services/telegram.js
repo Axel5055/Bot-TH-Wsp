@@ -7,6 +7,7 @@ const fs = require('fs');
 const { MessageMedia } = require('whatsapp-web.js');
 const { traducirManual, capitalizar } = require('../commands/utils/traducciones');
 const { getImagenPath } = require('../commands/config/imagenes');
+const { getImagenPathMobs } = require('../commands/config/imagenes');
 const readline = require('readline');
 
 const apiId = parseInt(process.env.TELEGRAM_API_ID, 10);
@@ -109,19 +110,6 @@ function ask(question) {
             const requisitosTraducidos = traducirManual(primeraLinea).map(capitalizar);
             const requisitoTraducido = requisitosTraducidos.join(' | ');
 
-            // Detección del laberinto
-            const lineaLaberinto = lineas.find(l => l.toUpperCase().includes('LABYRINTH'));
-            let laberinto = 'Desconocido';
-            if (lineaLaberinto) {
-                const laberintoCrudo = lineaLaberinto
-                    .replace(/[_*#]/g, '') // quitar _, *, #
-                    .split(':')[1]
-                    ?.trim();
-                console.log(`🔹 Laberinto crudo: "${laberintoCrudo}"`);
-                laberinto = capitalizar(traducirManual(laberintoCrudo)[0]);
-                console.log(`🔹 Laberinto traducido: "${laberinto}"`);
-            }
-
             // Detección de alertas individuales
             const alertas = [
                 { palabra: 'watcher', imagen: 'watcher', incluirMedalla: true },
@@ -173,7 +161,7 @@ function ask(question) {
 
             if (!alertaActivada) console.log("ℹ️ No se detectó ninguna alerta en este mensaje.");
 
-            // Enviar mensaje de MOBS + Laberinto
+            // Enviar mensaje de MOBS (sin laberinto)
             const mobsLine = lineas.find(l => l.toUpperCase().startsWith('MOBS:'));
             if (mobsLine) {
                 const mobs = mobsLine.split(':')[1].split(',').map(m => m.trim());
@@ -183,15 +171,15 @@ function ask(question) {
                 mobs.forEach(mob => {
                     mensajeMobs += `* *${capitalizar(traducirManual(mob)[0])}*\n`;
                 });
-                mensajeMobs += `\n🏰 Laberinto: ${laberinto}\n🎁 Regalos por Montones`;
+                // mensajeMobs += `\n🎁 Regalos por Montones`;
 
                 await sony.sendMessage(WHATSAPP_GROUP_ID, mensajeMobs);
-                console.log(`⚡ Mensaje de texto enviado con MOBS y Laberinto.`);
+                console.log(`⚡ Mensaje de texto enviado con MOBS.`);
 
                 // Enviar imágenes de los mobs
                 for (const mob of mobs) {
                     const claveImagen = mob.toLowerCase().replace(/\s+/g, '_');
-                    const ruta = getImagenPath(claveImagen);
+                    const ruta = getImagenPathMobs(claveImagen);
                     if (ruta && fs.existsSync(ruta)) {
                         const media = await MessageMedia.fromFilePath(ruta);
                         await sony.sendMessage(WHATSAPP_GROUP_ID, media);

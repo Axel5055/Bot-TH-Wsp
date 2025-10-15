@@ -19,7 +19,12 @@ const traduccionesManual = {
     kingdom_tycoon: 'Magnate',
     queen_bee: 'Abeja Reina',
     mega_maggot: 'Megalarva',
-    terrorthorn: 'Terrospín'
+    terrorthorn: 'Terrospín',
+    bon_appeti: 'Buen Apetito',
+    gawrilla: 'Gorila',
+    gryphon: 'Grifo',
+    blackwing: 'Alanegra',
+    frostwing: 'Alaescarcha',
 };
 
 /**
