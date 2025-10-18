@@ -2,7 +2,7 @@ require('dotenv').config();
 const { TelegramClient } = require('telegram');
 const { StringSession } = require('telegram/sessions');
 const { NewMessage } = require('telegram/events');
-const sony = require('../bot/client'); // WhatsApp client
+const sony = require('../bot/client'); // Cliente de WhatsApp
 const fs = require('fs');
 const { MessageMedia } = require('whatsapp-web.js');
 const { traducirManual, capitalizar } = require('../commands/utils/traducciones');
@@ -13,7 +13,11 @@ const readline = require('readline');
 const apiId = parseInt(process.env.TELEGRAM_API_ID, 10);
 const apiHash = process.env.TELEGRAM_API_HASH;
 const stringSession = new StringSession(process.env.TELEGRAM_SESSION || "");
-const WHATSAPP_GROUP_ID = process.env.WHATSAPP_GROUP_ID;
+
+// ✅ Ahora puede haber varios grupos separados por comas
+const WHATSAPP_GROUP_ID = process.env.WHATSAPP_GROUP_ID
+    ? process.env.WHATSAPP_GROUP_ID.split(',').map(id => id.trim())
+    : [];
 
 const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID;
 const TELEGRAM_GROUP_ID = process.env.TELEGRAM_GROUP_ID;
@@ -28,7 +32,7 @@ function extractTextFromMsg(msg) {
     return "";
 }
 
-// Función para enviar alerta a WhatsApp
+// Función para enviar alerta a WhatsApp (a varios grupos)
 async function enviarAlertaWhatsApp(tipoTraducido, requisitoTraducido, mensajeTexto, tipoImagen, incluirMedalla = false) {
     const mensaje = `🌐 ${tipoTraducido} 🌐
 📌 *Requisito*: ${requisitoTraducido}
@@ -37,24 +41,26 @@ async function enviarAlertaWhatsApp(tipoTraducido, requisitoTraducido, mensajeTe
 
 🅣🅗 ​ - ​ 🅑🅞🅣`;
 
-    if (!WHATSAPP_GROUP_ID) {
-        console.error("❌ WHATSAPP_GROUP_ID no definido en .env");
+    if (!WHATSAPP_GROUP_ID.length) {
+        console.error("❌ WHATSAPP_GROUP_ID no definidos en .env");
         return;
     }
 
     const rutaImagen = tipoImagen ? getImagenPath(tipoImagen.toLowerCase()) : null;
 
-    try {
-        if (rutaImagen && fs.existsSync(rutaImagen)) {
-            const media = await MessageMedia.fromFilePath(rutaImagen);
-            await sony.sendMessage(WHATSAPP_GROUP_ID, media, { caption: mensaje });
-            console.log(`✅ Imagen de ${tipoImagen} enviada con mensaje.`);
-        } else {
-            await sony.sendMessage(WHATSAPP_GROUP_ID, mensaje);
-            console.log(`⚡ Mensaje de texto enviado (sin imagen).`);
+    for (const groupId of WHATSAPP_GROUP_ID) {
+        try {
+            if (rutaImagen && fs.existsSync(rutaImagen)) {
+                const media = await MessageMedia.fromFilePath(rutaImagen);
+                await sony.sendMessage(groupId, media, { caption: mensaje });
+                console.log(`✅ Imagen de ${tipoImagen} enviada al grupo ${groupId}.`);
+            } else {
+                await sony.sendMessage(groupId, mensaje);
+                console.log(`⚡ Mensaje de texto enviado al grupo ${groupId} (sin imagen).`);
+            }
+        } catch (err) {
+            console.error(`❌ Error al enviar mensaje a ${groupId}: ${err.message}`);
         }
-    } catch (err) {
-        console.error(`❌ Error al enviar mensaje a WhatsApp: ${err.message}`);
     }
 }
 
@@ -154,7 +160,7 @@ function ask(question) {
                         await enviarAlertaWhatsApp(tipoTraducido, requisitoTraducido, extractedText, tipoImagen, alerta.incluirMedalla);
                     }
 
-                    console.log(`💬 Mensaje enviado a WhatsApp.`);
+                    console.log(`💬 Mensaje enviado a todos los grupos de WhatsApp.`);
                     break;
                 }
             }
@@ -171,21 +177,21 @@ function ask(question) {
                 mobs.forEach(mob => {
                     mensajeMobs += `* *${capitalizar(traducirManual(mob)[0])}*\n`;
                 });
-                // mensajeMobs += `\n🎁 Regalos por Montones`;
 
-                await sony.sendMessage(WHATSAPP_GROUP_ID, mensajeMobs);
-                console.log(`⚡ Mensaje de texto enviado con MOBS.`);
+                for (const groupId of WHATSAPP_GROUP_ID) {
+                    await sony.sendMessage(groupId, mensajeMobs);
+                    console.log(`⚡ Mensaje de texto enviado con MOBS a ${groupId}.`);
 
-                // Enviar imágenes de los mobs
-                for (const mob of mobs) {
-                    const claveImagen = mob.toLowerCase().replace(/\s+/g, '_');
-                    const ruta = getImagenPathMobs(claveImagen);
-                    if (ruta && fs.existsSync(ruta)) {
-                        const media = await MessageMedia.fromFilePath(ruta);
-                        await sony.sendMessage(WHATSAPP_GROUP_ID, media);
-                        console.log(`✅ Imagen de ${mob} enviada.`);
-                    } else {
-                        console.log(`⚠️ No se encontró imagen para: ${mob} (clave: ${claveImagen})`);
+                    for (const mob of mobs) {
+                        const claveImagen = mob.toLowerCase().replace(/\s+/g, '_');
+                        const ruta = getImagenPathMobs(claveImagen);
+                        if (ruta && fs.existsSync(ruta)) {
+                            const media = await MessageMedia.fromFilePath(ruta);
+                            await sony.sendMessage(groupId, media);
+                            console.log(`✅ Imagen de ${mob} enviada a ${groupId}.`);
+                        } else {
+                            console.log(`⚠️ No se encontró imagen para: ${mob} (clave: ${claveImagen})`);
+                        }
                     }
                 }
             }

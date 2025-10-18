@@ -25,6 +25,9 @@ const traduccionesManual = {
     gryphon: 'Grifo',
     blackwing: 'Alanegra',
     frostwing: 'Alaescarcha',
+    serpent_gladiator: 'Gladiador Serpiente',
+    cottageroar: 'Rugido Feroz',
+    hunt_monsters: 'Cazar Mobs'
 };
 
 /**

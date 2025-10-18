@@ -18,7 +18,9 @@ const IMAGENES_ALERTAS = {
     gryphon: 'grifo.jpg',
     saberfang: 'saberfang.jpg',
     blackwing: 'alanegra.jpg',
-    frostwing: 'alaescarcha.jpg'
+    frostwing: 'alaescarcha.jpg',
+    serpent_gladiator: 'serpiente.jpg',
+    cottageroar: 'rugido.jpg'
 };
 
 /**
